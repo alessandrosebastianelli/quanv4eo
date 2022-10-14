@@ -1,70 +1,157 @@
 from joblib import Parallel, delayed
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import numpy as np
 
-class qConv2D:
+def unwrap_self(image, c, j, i, qcircuit, filters, ksize):
+    '''
+        Joblib or Multiprocessing is based on pickling to pass functions around to achieve parallelization. In order to pickle the object, this object must 
+        capable of being referred to in the global context for the unpickle to be able to access it. The function we want to parallel above is not in global 
+        context, therefore, causing an error. 
+        Therefore, one solution I found (http://qingkaikong.blogspot.com/2016/12/python-parallel-method-in-class.html) is to create a function outside 
+        the class to unpack the self from the arguments and calls the function again.
+    '''
+    return QConv2D.qConv2D2(image, c, j, i, qcircuit, filters, ksize)
+
+class QConv2D:
+    '''
+        Quantum Convolution 2D
+    '''
 
     def __init__(self, circuit, filters, kernel_size, stride, parallelize=0):
+        '''
+            Quantum Convolution 2D layer:
+            
+            - circuit: quantum circuit
+            - filters: number of filters for the convolution, must not exceed the number of qubits
+            - kernel_size: size of the kernel for the convolutio, must not exceed the square root of number of qubits
+            - stride: value for stride in convolution
+            - parallelize: if == 0 no parallelization, otherwise parallize with workers=parallelize
+        '''
         self.circuit     = circuit
         self.filters     = filters
         self.kernel_size = kernel_size
         self.stride      = stride
         self.parallelize = parallelize
 
-    def apply(self, image):
+    def apply(self, image, verbose=False):
+        '''
+            Apply the Quantum Convolution to the image
 
+            Input: 
+                - image: a 3D channel-last matrix in R^(w,h,c), w: width, h: height, c:channels
+            Output:
+                - quantum convolved image: a 3D chanell-last matrix in R^(wc,hc,f), wc: width, hc: height, f:channels
+        '''
+        # There are two versions, one parellelized an one not
         if self.parallelize == 0:
-            return self.__qConv2D(image)
+            return self.__qConv2D(image, verbose)
         else:
-            return self.__par_qConv2D(image)
-        pass
+            return self.par_qConv2D(image, self.circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose)
+    
+    @staticmethod
+    def par_qConv2D(image, qcircuit, filters, ksize, stride, njobs, verbose):
+        '''
+            ###########################################################################
+            # !!! This method is ment to be private, use the .apply method insted !!! #
+            ###########################################################################
 
-    def __par_qConv2D(self, image):
+            Parallelize the quantum convolution.
+
+            Inputs:
+                - image: a 3D channel-last matrix in R^(w,h,c), w: width, h: height, c:channels
+                - c: channel index from paralallization
+                - i: row index from parallelization
+                - j: colum index from parallelization
+                - qcircuit: quantum circuit
+                - filters: number of filters for the convolution, must not exceed the number of qubits
+                - kernel_size: size of the kernel for the convolutio, must not exceed the square root of number of qubits
+                - stride: value for stride in convolution
+                - njobs: number of workers for parallelization
+                - verbose: if True print tqdm progress bar
+            Output:
+                - res: quantum convolved image
+        '''
+
+        # Calculates the image shape after the convolution
         h, w, ch = image.shape
-        h_out = (h-self.kernel_size) // self.stride + 1
-        w_out = (w-self.kernel_size) // self.stride + 1 
+        h_out = (h-ksize) // stride + 1
+        w_out = (w-ksize) // stride + 1 
+        # Embedding x and y spatial loops and the spectral loop into Joblib
+        res = Parallel(n_jobs=njobs)( 
+            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), desc='Column', disable=not(verbose))
+            for i in tqdm(range(0, w-ksize, stride), desc='Row', leave=False, disable=not(verbose))
+            for c in range(ch)
+        )
+
+        # Joblib returns a 1-D array, the following functions are used to reshape the convolution output into the correct shape
+        res = np.array(res).flatten()
+        res = res.reshape((h_out-1, w_out-1, ch, filters))
+        # As for the classic convolution, the mean over the channel dimension is applied
+        res = np.mean(res, -2, keepdims = False)
+        return res
+    
+    @staticmethod
+    def qConv2D2(image, c, j, i, qcircuit, filters, ksize):
+        '''
+            ###########################################################################
+            # !!! This method is ment to be private, use the .apply method insted !!! #
+            ###########################################################################
+
+            Applies the quantum circuit to a small portion of the input image.
+
+            Inputs:
+                - image: a 3D channel-last matrix in R^(w,h,c), w: width, h: height, c:channels
+                - c: channel index from paralallization
+                - i: row index from parallelization
+                - j: colum index from parallelization
+                - qcircuit: quantum circuit
+                - filters: number of filters for the convolution, must not exceed the number of qubits
+                - kernel_size: size of the kernel for the convolutio, must not exceed the square root of number of qubits
+            Output:
+                - q_results: 1D quantum output vector
+        '''
+        out = np.zeros((filters))
+        p = image[j:j+ksize, i:i+ksize, c]
+        q_results = qcircuit(p.reshape(-1))
         
-        res = Parallel(n_jobs=self.parallelize)( 
-        delayed(qConv2D2)(image, c, j, i) for j in range(0, h-self.kernel_size, self.stride) for i in range(0, w-self.kernel_size, self.stride) for c in range(ch))
-
-        return np.array(res).flatten()
-
-    def __qConv2D2(self, image, c, j, i):
-        out = np.zeros((self.filters))
-        p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
-        q_results = self.circuit(p.reshape(-1))
-
-        for k in range(self.filters):
-            out[k] = q_results[k]
+        #for k in range(filters):
+        #    out[k] = q_results[k]
             
-        return out
+        return q_results
 
-    def __qConv2D(self, image):
+    def __qConv2D(self, image, verbose):
+
         '''
-            Convolves an image with many applications of the same
-            quantum circuit
+            Non parallelized quantum convolution.
+
+            Inputs:
+                - image: a 3D channel-last matrix in R^(w,h,c), w: width, h: height, c:channels
+                - verbose: if True print tqdm progress bar
+            Output:
+                - q_results: 1D quantum output vector
         '''
+        # Calculates the image shape after the convolution
         h, w, ch = image.shape
         h_out = (h-self.kernel_size) // self.stride +1
         w_out = (w-self.kernel_size) // self.stride +1
 
-        out = np.zeros((h_out, w_out, self.filters, ch))
+        out = np.zeros((h_out, w_out, ch, self.filters))
         
         ctx = 0
         cty = 0
         # Spectral Loop
-        for c in range(ch):
-            # Spatial Loops
-            for j in range(0, h-self.kernel_size, self.stride):
-                for i in range(0, w-self.kernel_size, self.stride):            
+        for c in tqdm(range(ch), desc='Channel', disable=not(verbose)):
+            # Spatial Loops                                                
+            for j in tqdm(range(0, h-self.kernel_size, self.stride), desc='Column', leave=False, disable=not(verbose)):
+                for i in tqdm(range(0, w-self.kernel_size, self.stride), desc='Row', leave=False, disable=not(verbose)):            
                     # Process a kernel_size*kernel_size region of the images
                     # with the quantum circuit stride*stride
                     p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
 
                     q_results = self.circuit(p.reshape(-1))
 
-                    for k in range(filters):
-                        out[cty, ctx, k, c] = q_results[k]
+                    for k in range(self.filters):
+                        out[cty, ctx, c, k] = q_results[k]
 
                     ctx+=1
                 ctx = 0
@@ -73,7 +160,7 @@ class qConv2D:
             ctx = 0
             cty = 0
 
-        out = np.mean(out, -1, keepdims = False)
+        out = np.mean(out, -2, keepdims = False)
 
         return out
 
