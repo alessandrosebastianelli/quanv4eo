@@ -4,6 +4,19 @@ import numpy as np
 
 
 def ry_random(qubits, kernel_size, filters, n_layers):
+    '''
+        Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
+
+        Inputs:
+            - qubits: number of qubits for the quantum circuit
+            - kernel_size: kernel size for quantum convolution, is used to regulates the number of Ry gates.
+                           !!! kernel_size**2 must be less than #qubits
+            - filters: number of desired output filters.
+                       !!! 
+            - n_layers: filters must be less than qubits
+        Output:
+            - circuit: return the quantum circuit
+    '''
 
     # The number of filters can not exceed the number of qubits
     if filters > qubits:
@@ -25,10 +38,8 @@ def ry_random(qubits, kernel_size, filters, n_layers):
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
             qml.RY(np.pi * phi[j], wires=j)
-
         # Random quantum circuit
         RandomLayers(rand_params, wires=list(range(qubits)))
-
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
