@@ -78,14 +78,17 @@ class QConv2D:
         w_out = (w-ksize) // stride + 1 
         # Embedding x and y spatial loops and the spectral loop into Joblib
         res = Parallel(n_jobs=njobs)( 
-            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), desc='Column', disable=not(verbose))
-            for i in tqdm(range(0, w-ksize, stride), desc='Row', leave=False, disable=not(verbose))
+            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose))
+            for i in range(0, w-ksize, stride)
             for c in range(ch)
         )
 
         # Joblib returns a 1-D array, the following functions are used to reshape the convolution output into the correct shape
         res = np.array(res).flatten()
-        res = res.reshape((h_out-1, w_out-1, ch, filters))
+        try:
+            res = res.reshape((h_out, w_out, ch, filters))
+        except:
+            res = res.reshape((h_out-1, w_out-1, ch, filters))
         # As for the classic convolution, the mean over the channel dimension is applied
         res = np.mean(res, -2, keepdims = False)
         return res
