@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import random
+import cv2
 
 class datareader:
     '''
@@ -57,6 +58,15 @@ class datareader:
 
     @staticmethod
     def __shuffle(dataset):
+        '''
+            Random shuffle the dataset
+
+            Inputs:
+                - dataset: tuple of image paths and labels. (paths, labels)
+            Output:
+                - dataset: tuple of shuffled image paths and labels. (paths, labels)
+
+        '''
         z = list(zip(dataset[0], dataset[1]))
         random.shuffle(z)
         paths, labels = zip(*z)
@@ -66,22 +76,48 @@ class datareader:
         return (paths, labels)
 
     @staticmethod
-    def generator(dataset, batch_size, img_shape):
+    def generator(dataset, batch_size, img_shape, normalize = True):
+        '''
+            Basic Keras-like image loader
 
+            Inputs:
+                - dataset: tuple of image paths and labels. (paths, labels)
+                - batch_size: int value represent the batch of image to be loaded iteratively
+                - img_shape: shape of the image that need to be loaded
+                - normalize: if true apply normalization
+            Yield:
+                - x_in: tensor containg a batch size of images
+                - x_ou: tensor containg a batch size of labels
+        '''
         dataset = datareader.__shuffle(dataset)
-
         paths  = dataset[0]
         labels = dataset[1]
 
-        x_in  = np.zeros((batch_size, ) + img_shape)
-        x_out = np.zeros((batch_size, ) + labels[0].shape)
-        
-        print(x_in.shape, x_out.shape)
-        
-        while False:
+        counter = 0
+        while True:
+            x_in = np.zeros((batch_size, ) + img_shape)
+            x_ou = np.zeros((batch_size, ) + labels[0].shape)
 
             for i in range(batch_size):
-                pass
+                # Load an image and a label
+                img, _ = datareader.load(paths[counter])
+                lbl    = labels[counter]
+                # If normalizer is try apply normalization, in this case I put minmax,
+                # you can decide among the ones available in normalizer class
+                if normalize != None: img = normalizer.minmax_scaler(img)
+                # Apply reshape if there is a mistmach between img_shape and real image shape
+                if img_shape != img.shape: img = cv2.resize(img, shape)
+                # Fill the batch input and output vectors
+                x_in[i, ...] = img
+                x_ou[i, ...] = lbl
+            
+                counter += 1
+            # If the counter is greater than the dataset size, reset counter and shuffle the dataset
+            if counter >= len(paths) - batch_size:
+                dataset = datareader.__shuffle(dataset) 
+                counter = 0
+
+            yield x_in, x_ou
 
 
         
