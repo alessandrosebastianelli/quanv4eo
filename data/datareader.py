@@ -1,3 +1,4 @@
+from .normalizer import normalizer
 import matplotlib.pyplot as plt
 import numpy as np
 import rasterio

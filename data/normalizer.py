@@ -1,11 +1,13 @@
 import numpy as np
 
 class normalizer:
+    '''
+        Class containing static methods for normalizing images
+    '''
 
     @staticmethod
     def percentile_prescaler(data, perc=95, mmin = None):
         '''
-        
             Clip data between minimum and maximum based on the percentile at perc
         
             
@@ -14,8 +16,7 @@ class normalizer:
                 - perc: the percentile value
                 - mmin (optional): the minimum
             Outputs:
-                - data: normalized WxHxB image, with W width, H height and B bands
-                
+                - data: normalized WxHxB image, with W width, H height and B bands     
         '''
         
         if mmin == None: mmin = np.min(data)
@@ -28,7 +29,6 @@ class normalizer:
     @staticmethod
     def minmax_scaler(data, mmin=None, mmax=None, clip = [None, None], bandwise = False): 
         '''
-        
             Apply the min max scaler to the input data. The formula is:
             
             out = (data - minimum)/(maximum - minimum + E)          (1)
@@ -43,8 +43,7 @@ class normalizer:
                 - clip (optional): a list of two values used to constrain the image values 
                 - bandwise: if true apply (1) to each band separately
             Outputs: 
-                - data: normalized WxHxB image, with W width, H height and B bands
-                
+                - data: normalized WxHxB image, with W width, H height and B bands      
         '''
 
         E = 0.001
@@ -66,7 +65,6 @@ class normalizer:
     @staticmethod
     def max_scaler(data, mmax=None, clip = [None, None], bandwise=False): 
         '''
-        
             Apply the max scaler to the input data. The formula is:
             
             out = data/maximum          (1)
@@ -79,7 +77,6 @@ class normalizer:
                 - bandwise: if true apply (1) to each band separately
             Outputs:
                 - data: normalized WxHxB image, with W width, H height and B bands
-                
         '''
         
         if bandwise:
@@ -98,7 +95,6 @@ class normalizer:
     @staticmethod
     def std_scaler(data, mmean=None, sstd = None, clip = [None, None], bandwise=False):
         '''
-        
             Apply the standardizer to the input data. The formula is:
             
             out = (data - mean)/standard deviation         (1)
@@ -111,8 +107,7 @@ class normalizer:
                 - clip (optional): a list of two values used to constrain the image values
                 - bandwise: if true apply (1) to each band separately
             Outputs:
-                - data: normalized WxHxB image, with W width, H height and B bands
-                
+                - data: normalized WxHxB image, with W width, H height and B bands     
         '''
         if bandwise:
             for b in range(data.shape[-1]):
