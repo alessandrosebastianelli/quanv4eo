@@ -44,4 +44,3 @@ def ry_random(qubits, kernel_size, filters, n_layers):
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
     return circuit
-
