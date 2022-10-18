@@ -106,7 +106,7 @@ class datareader:
                 # you can decide among the ones available in normalizer class
                 if normalize != None: img = normalizer.minmax_scaler(img)
                 # Apply reshape if there is a mistmach between img_shape and real image shape
-                if img_shape != img.shape: img = cv2.resize(img, shape)
+                if img_shape != img.shape: img = cv2.resize(img, img_shape[:2])
                 # Fill the batch input and output vectors
                 x_in[i, ...] = img
                 x_ou[i, ...] = lbl
