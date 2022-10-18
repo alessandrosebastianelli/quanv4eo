@@ -166,5 +166,3 @@ class QConv2D:
         out = np.mean(out, -2, keepdims = False)
 
         return out
-
-

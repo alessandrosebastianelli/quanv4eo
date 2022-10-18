@@ -118,8 +118,3 @@ class datareader:
                 counter = 0
 
             yield x_in, x_ou
-
-
-        
-
-        
