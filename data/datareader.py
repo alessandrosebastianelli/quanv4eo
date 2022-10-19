@@ -118,3 +118,33 @@ class datareader:
                 counter = 0
 
             yield x_in, x_ou
+    @staticmethod
+    def generatorv2(dataset, img_shape, normalize = True):
+        '''
+            Basic Keras-like image loader
+
+            Inputs:
+                - dataset: tuple of image paths and labels. (paths, labels)
+                - img_shape: shape of the image that need to be loaded
+                - normalize: if true apply normalization
+            Yield:
+                - x_in: tensor containg a batch size of images
+                - x_ou: tensor containg a batch size of labels
+        '''
+        paths  = dataset[0]
+        labels = dataset[1]
+
+        for i in range(len(paths)):
+            
+            # Load an image and a label
+            img, _ = datareader.load(paths[i])
+            lbl    = labels[i]
+            pth    = paths[i]
+            # If normalizer is try apply normalization, in this case I put minmax,
+            # you can decide among the ones available in normalizer class
+            if normalize != None: img = normalizer.minmax_scaler(img)
+            # Apply reshape if there is a mistmach between img_shape and real image shape
+            if img_shape != img.shape: img = cv2.resize(img, img_shape[:2])
+            # Fill the batch input and output vectors
+
+            yield img, lbl, pth
