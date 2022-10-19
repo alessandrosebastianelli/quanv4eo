@@ -10,24 +10,20 @@ def ry_random(qubits, kernel_size, filters, n_layers):
         Inputs:
             - qubits: number of qubits for the quantum circuit
             - kernel_size: kernel size for quantum convolution, is used to regulates the number of Ry gates.
-                           !!! kernel_size**2 must be less than #qubits
+                           !!! kernel_size**2 must be less than #qubits !!! 
             - filters: number of desired output filters.
-                       !!! 
             - n_layers: filters must be less than qubits
         Output:
             - circuit: return the quantum circuit
     '''
 
     # The number of filters can not exceed the number of qubits
-    if filters > qubits:
-        # If so, force the number of filters to the maximum possible
-        filters = qubits
+    # If so, force the number of filters to the maximum possible
+    if filters > qubits: filters = qubits
     
     # The sqrt(kernel size) can not exceed the number of qubits
-    if kernel_size**2 > qubits:
-         # If so, force the kernel size to the maximum possible
-        kernel_size = int(np.sqrt(qubits))
-
+    # If so, force the kernel size to the maximum possible
+    if kernel_size**2 > qubits: kernel_size = int(np.sqrt(qubits))
 
     dev = qml.device("default.qubit", wires=qubits)
     # Random circuit parameters
