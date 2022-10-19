@@ -78,7 +78,7 @@ class QConv2D:
         w_out = (w-ksize) // stride + 1 
         # Embedding x and y spatial loops and the spectral loop into Joblib
         res = Parallel(n_jobs=njobs)( 
-            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose))
+            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False)
             for i in range(0, w-ksize, stride)
             for c in range(ch)
         )
