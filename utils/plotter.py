@@ -12,7 +12,7 @@ def plot_result(img, out):
 
     for i in range(out.shape[-1]):
         axes[0,i+1].imshow(out[...,i], vmin = -1, vmax = 1)
-        axes[0,i+1].set_title('QCNN - B {}'.format(i))
+        axes[0,i+1].set_title('QCNN - F. Map {}'.format(i))
         axes[0,i+1].axis('off')
         
         axes[1,i+1].hist(out[...,i].flatten(), 60, color='black')

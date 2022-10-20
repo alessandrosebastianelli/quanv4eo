@@ -56,7 +56,7 @@ class datahandler:
         classes_raw = glob.glob(os.path.join(self.root, '*'))
 
         paths = {}
-        for i, c in tqdm(enumerate(classes_raw), disable=not(verbose)):
+        for i, c in tqdm(enumerate(classes_raw), disable=not(verbose), colour='black'):
             imgs_c = glob.glob(os.path.join(c, '*'))
             paths[c.split(os.sep)[-1]] = imgs_c
 
@@ -77,7 +77,7 @@ class datahandler:
         
         print('===================================================')
         print('Dataset {}\n'.format(name))
-        for i, c in enumerate(paths.keys()): print('Class {} - {:<20s} - #images: {}'.format(i,c,len(paths[c])))
+        for i, c in enumerate(paths.keys()): print('Class {} - {:<25s} - #images: {}'.format(i,c,len(paths[c])))
 
     def split(self, paths, factor=0.2):
         '''

@@ -78,7 +78,7 @@ class QConv2D:
         w_out = (w-ksize) // stride + 1 
         # Embedding x and y spatial loops and the spectral loop into Joblib
         res = Parallel(n_jobs=njobs)( 
-            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False)
+            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False, colour='black')
             for i in range(0, w-ksize, stride)
             for c in range(ch)
         )
@@ -143,10 +143,10 @@ class QConv2D:
         ctx = 0
         cty = 0
         # Spectral Loop
-        for c in tqdm(range(ch), desc='Channel', disable=not(verbose)):
+        for c in tqdm(range(ch), desc='Channel', disable=not(verbose), colour='black'):
             # Spatial Loops                                                
-            for j in tqdm(range(0, h-self.kernel_size, self.stride), desc='Column', leave=False, disable=not(verbose)):
-                for i in tqdm(range(0, w-self.kernel_size, self.stride), desc='Row', leave=False, disable=not(verbose)):            
+            for j in tqdm(range(0, h-self.kernel_size, self.stride), desc='Column', leave=False, disable=not(verbose), colour='black'):
+                for i in tqdm(range(0, w-self.kernel_size, self.stride), desc='Row', leave=False, disable=not(verbose), colour='black'):            
                     # Process a kernel_size*kernel_size region of the images
                     # with the quantum circuit stride*stride
                     p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
