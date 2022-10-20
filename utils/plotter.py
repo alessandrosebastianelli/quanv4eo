@@ -16,6 +16,7 @@ def plot_result(img, out):
         axes[0,i+1].axis('off')
         
         axes[1,i+1].hist(out[...,i].flatten(), 60, color='black')
+        axes[1,i+1].set_xlim([-1,1])
 
     fig.tight_layout()
     plt.show()
