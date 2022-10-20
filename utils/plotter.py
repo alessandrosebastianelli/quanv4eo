@@ -21,3 +21,18 @@ def plot_result(img, out):
     fig.tight_layout()
     plt.show()
     plt.close()
+
+def plot_features_map(feat_maps):
+    fig, axes = plt.subplots(nrows = 2, ncols = feat_maps.shape[-1], figsize = (2*(feat_maps.shape[-1]+1),4))
+    
+    for i in range(feat_maps.shape[-1]):
+        axes[0,i].imshow(feat_maps[...,i], vmin = -1, vmax = 1)
+        axes[0,i].set_title('QCNN - F. Map {}'.format(i))
+        axes[0,i].axis('off')
+        
+        axes[1,i].hist(feat_maps[...,i].flatten(), 60, color='black')
+        axes[1,i].set_xlim([-1,1])
+
+    fig.tight_layout()
+    plt.show()
+    plt.close()

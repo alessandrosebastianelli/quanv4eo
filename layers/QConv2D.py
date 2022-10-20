@@ -113,7 +113,7 @@ class QConv2D:
             Output:
                 - q_results: 1D quantum output vector
         '''
-        out = np.zeros((filters))
+       #out = np.zeros((filters))
         p = image[j:j+ksize, i:i+ksize, c]
         q_results = qcircuit(p.reshape(-1))
         
