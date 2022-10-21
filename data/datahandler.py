@@ -15,19 +15,22 @@ class datahandler:
             It creates a Data Handler object.
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             The dataset must be organized in this format:
-                * Root Folder
-                +---+ Class  A  folder
-                |   |---- image 1
-                |   |---- image 2
-                |   |---- image ...
-                +---+ Class  B  folder
-                |   |---- image 1
-                |   |---- image 2
-                |   |---- image ...
-                +---+ Class ... folder
-                |   |---- image 1
-                |   |---- image 2
-                |   |---- image ...
+
+            QuantumCNN
+            │   README.md
+            │   requirements.txt    
+            │
+            └───circuits
+            └───...
+            └───datasets
+                └───EuroSAT
+                    └───Highway
+                            highway1.jpg
+                            highway2.jpg                
+                    └─── ....
+                    └───Lake
+                            lake1.jpg
+                            lake2.jpg 
 
             The following image format are supported:
                 - .png
