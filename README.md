@@ -6,8 +6,8 @@ This repository contains my implementation of Quanvolutional Neural Network pres
 
 The repository contains several jupyter notebook that must be runned in a precise order
 
-1.[*Quantum Convolutional Processing*](Quantum Convolutional Processing.ipynb): this notebook shows how to load a dataset, how to apply quantum convolution to precces it and how to save results
-2.[*Quantum Convolutional Neural Networks*](Quantum Convolutional Neural Networks.ipynb): this notebook loads the quantum processed dataset and run the classification of the dataset
+1. [*Quantum Convolutional Processing*](Quantum Convolutional Processing.ipynb): this notebook shows how to load a dataset, how to apply quantum convolution to precces it and how to save results
+2. [*Quantum Convolutional Neural Networks*](Quantum Convolutional Neural Networks.ipynb): this notebook loads the quantum processed dataset and run the classification of the dataset
 3.  
 
 
