@@ -3,8 +3,8 @@ qcnnv1s = {
             'learning_rate':   0.0002,
             'metrics':         ['accuracy'],
             'dropout':         0.2,
-            'batch_size':      2,
-            'epochs':          50,
+            'batch_size':      16,
+            'epochs':          2,
             'early_stopping':  10
         }
 

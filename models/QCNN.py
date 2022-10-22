@@ -1,17 +1,35 @@
-from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Activation, Flatten, Dense, Conv2D, MaxPooling2D, Dropout
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
-
-from .qconfig import *
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Model
 
 from data.datareader import datareader
+from .qconfig import *
 
+from datetime import datetime
+from tqdm.auto import tqdm
+import pandas as pd
+import numpy as np
+import os
 
 class QCNNv1:
+    '''
+        Quantum Convolutional Neural Network Class (QCNN) Version 1. This class is ment to be used to
+        develop hybrid quantum convolutional neural networks. This QCNN works with features maps obtained
+        with a quantum cicuit, indeed it is composed of only dense layers, since the convolution operator has
+        been already applied.
+    '''
 
     def __init__(self, img_shape, n_classes, name=None):
-        
+        '''
+            Class builder.
+
+            Inputs:
+                - img_shape: shape of the feature maps, channel last
+                - n_classes: number of output classes
+                - name: name of the QCNN, default QCNNv1
+        '''
+
         self.img_shape = img_shape
         self.n_classes = n_classes
         self.name = name
@@ -19,7 +37,9 @@ class QCNNv1:
         self.model = self.__build() 
 
     def __build(self):
-        
+        '''
+            This method builds the QCNN.
+        '''
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
         x   = MaxPooling2D(3)(x)
@@ -36,23 +56,25 @@ class QCNNv1:
 
         return model
     
-    def train(self, train_dataset, val_dataset):
+    def train(self, train_dataset, val_dataset, labels_mapper, normalize=None):
 
+        # Early Stopping to avoid overfitting
         es = EarlyStopping(monitor='val_loss', 
                            patience=qcnnv1s['early_stopping'],
                            mode='auto',
                            verbose=0,
                            baseline=None)
-
+        
+        # Training and Validation data loader
         train_gen = datareader.generator(train_dataset, 
                                          qcnnv1s['batch_size'],
                                          self.img_shape,
-                                         normalize=None)
+                                         normalize=normalize)
         val_gen   = datareader.generator(val_dataset,
                                          qcnnv1s['batch_size'],
                                          self.img_shape,
-                                         normalize=None)
-
+                                         normalize=normalize)
+        # Model Training
         history = self.model.fit(
                 train_gen,
                 steps_per_epoch  = len(train_dataset[0])//qcnnv1s['batch_size'],
@@ -60,11 +82,60 @@ class QCNNv1:
                 validation_steps = len(val_dataset[0])//qcnnv1s['batch_size'],
                 epochs           = qcnnv1s['epochs'],
                 callbacks        = [es])
-
+    
         self.history = history
+        
+        # Make dir to save results
+        path = os.path.join('results', 'QCNNv1',
+                            '{}'.format(datetime.now().strftime("%d-%m-%Y-%H:%M:%S")))
+        os.makedirs(path)
+
+        # Save model
+        model_path = os.path.join(path, 'model.h5')
+        self.model.save(model_path)
+        print('{:<30s}{}'.format('Model Saved', model_path))
+        # Save history
+        history_path = os.path.join(path,'history.csv')
+        df = pd.DataFrame(history.history)
+        df.to_csv(history_path)
+        print('{:<30s}{}'.format('History Saved', history_path))
+        # Test model
+        self.test(train_dataset, val_dataset, path, labels_mapper, normalize)
+
+    def __make_pred(self, dataset, iterator, path, name, labels_mapper):
+        predictions = np.zeros(np.shape(dataset[1]))
+        targets     = np.zeros(np.shape(dataset[1]))
+        paths       = []
+
+        for i in tqdm(range(len(dataset[0]))):
+            x, y, ps = next(iterator)
+            p = self.model.predict(x[np.newaxis,...], verbose = 0)
+
+            predictions[i] = p[0]
+            targets[i]     = y
+            paths.append(ps)
+        
+        training_res = os.path.join(path, name+'-results.csv')
+        df = pd.DataFrame({'Classes'    : list(map(labels_mapper.get, list(np.argmax(targets, axis=-1)))),
+                           'Predictions': np.argmax(predictions, axis=-1), 
+                           'Targets':     np.argmax(targets, axis=-1),
+                           'Paths':       paths})
+        df.to_csv(training_res)
+        print('{:<30s}{}'.format(name +' Results', training_res))
 
 
+    def test(self, train_dataset, val_dataset, path, labels_mapper, normalize=None):
+        # Training and Validation data loader
+        train_gen = iter(datareader.generatorv2(train_dataset, 
+                                         self.img_shape,
+                                         normalize=normalize))
+        val_gen   = iter(datareader.generatorv2(val_dataset,
+                                         self.img_shape,
+                                         normalize=normalize))
 
+        # Training Results
+        self.__make_pred(train_dataset, train_gen, path, 'training', labels_mapper)
+        self.__make_pred(val_dataset,   val_gen,   path, 'validation', labels_mapper)
 
 
 
