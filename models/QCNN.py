@@ -56,7 +56,21 @@ class QCNNv1:
 
         return model
     
-    def train(self, train_dataset, val_dataset, labels_mapper, normalize=None):
+    def train_test(self, train_dataset, val_dataset, labels_mapper, normalize=None):
+        '''
+            Train and test the model.
+
+            The model is firstly trained, then the weights and the training history is saved.
+            Afterwards the model is tested on both the training and the validation set. Also
+            in this case resutls are saved.
+
+            Inpus:
+             - train_dataset: tuple containing training paths and labels
+             - val_dataset:   tuple containing validation paths and laels
+             - labels_mapper: dictionary mapping the predicted classes (one hot encoded) into
+                              class names
+             - normalize:     if true apply normalization (used by data loaders)
+        '''
 
         # Early Stopping to avoid overfitting
         es = EarlyStopping(monitor='val_loss', 
@@ -136,6 +150,4 @@ class QCNNv1:
         # Training Results
         self.__make_pred(train_dataset, train_gen, path, 'training', labels_mapper)
         self.__make_pred(val_dataset,   val_gen,   path, 'validation', labels_mapper)
-
-
 
