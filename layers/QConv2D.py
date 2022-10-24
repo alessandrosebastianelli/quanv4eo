@@ -4,11 +4,12 @@ import numpy as np
 
 def unwrap_self(image, c, j, i, qcircuit, filters, ksize):
     '''
-        Joblib or Multiprocessing is based on pickling to pass functions around to achieve parallelization. In order to pickle the object, this object must 
-        capable of being referred to in the global context for the unpickle to be able to access it. The function we want to parallel above is not in global 
-        context, therefore, causing an error. 
-        Therefore, one solution I found (http://qingkaikong.blogspot.com/2016/12/python-parallel-method-in-class.html) is to create a function outside 
-        the class to unpack the self from the arguments and calls the function again.
+        Joblib or Multiprocessing is based on pickling to pass functions around to achieve parallelization. 
+        In order to pickle the object, this object must capable of being referred to in the global context for
+        the unpickle to be able to access it. The function we want to parallel above is not in global context,
+        therefore, causing an error. Therefore, one solution I found
+        (http://qingkaikong.blogspot.com/2016/12/python-parallel-method-in-class.html) 
+        is to create a function outside the class to unpack the self from the arguments and calls the function again.
     '''
     return QConv2D.qConv2D2(image, c, j, i, qcircuit, filters, ksize)
 

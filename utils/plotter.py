@@ -43,6 +43,19 @@ def plot_features_map(feat_maps):
     plt.close()
 
 def plot_training(name, display = True, latest=False):
+    '''
+        This function plots the training and validation curves of a specific model, merging
+        all the simulations done with that model, unless latest is set to True.
+
+        Inputs:
+            - name:     name of the model (must correspond to a real name used in the main files,
+                        a folder with the same name must be in results folder)
+            - display:  if True it displays the plot, in any case a copy is saved in 
+                        results/name/training.png
+            - latest:   if true plot the training and validation curves for only the last model
+                        simulation
+    '''
+
     path = os.path.join('results', name)
     results = glob.glob(os.path.join(path, '*'))
     results.sort()
