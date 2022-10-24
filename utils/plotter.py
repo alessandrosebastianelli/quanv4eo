@@ -28,6 +28,15 @@ def plot_result(img, out):
     plt.close()
 
 def plot_features_map(feat_maps):
+    '''
+        Plot the feature maps matrix in a n cols plot, where n depends on the number of
+        the feature map in feat_maps.
+        
+        Inputs:
+            feat_maps: channel last array with N channels
+
+    '''
+
     fig, axes = plt.subplots(nrows = 2, ncols = feat_maps.shape[-1], figsize = (2*(feat_maps.shape[-1]+1),4))
     
     for i in range(feat_maps.shape[-1]):
