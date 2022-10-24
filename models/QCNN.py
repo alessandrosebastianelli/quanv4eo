@@ -111,7 +111,7 @@ class QCNNv1:
         # Save history
         history_path = os.path.join(path,'history.csv')
         df = pd.DataFrame(history.history)
-        df.to_csv(history_path)
+        df.to_csv(history_path, index=False)
         print('{:<30s}{}'.format('History Saved', history_path))
         # Test model
         self.test(train_dataset, val_dataset, path, labels_mapper, normalize)
@@ -171,7 +171,7 @@ class QCNNv1:
                            'Predictions': np.argmax(predictions, axis=-1), 
                            'Targets':     np.argmax(targets, axis=-1),
                            'Paths':       paths})
-        df.to_csv(training_res)
+        df.to_csv(training_res, index=False)
         print('{:<30s}{}'.format(name +' Results', training_res))
 
 

@@ -1,4 +1,9 @@
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import glob
+import os
+
 
 def plot_result(img, out):
     fig, axes = plt.subplots(nrows = 2, ncols = out.shape[-1]+1, figsize = (2*(out.shape[-1]+1),4))
@@ -35,4 +40,33 @@ def plot_features_map(feat_maps):
 
     fig.tight_layout()
     plt.show()
+    plt.close()
+
+def plot_training(name, display = True, latest=False):
+    path = os.path.join('results', name)
+    results = glob.glob(os.path.join(path, '*'))
+    results.sort()
+
+    if latest: results = results[-1]
+
+    df = pd.read_csv(os.path.join(results[0], 'history.csv'))
+    nc = len(df.columns)
+
+    # Plot history
+    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(len(df[df.columns[0]]), nc*3))
+    for result in results:
+        df = pd.read_csv(os.path.join(result, 'history.csv')) 
+        for n in range(nc):
+            df[df.columns[n]].plot(ax=ax[n], style='.-', label = result.split(os.sep)[-1])
+            ax[n].set_title(df.columns[n])
+            ax[n].legend()
+            ax[n].set_xlabel('Epochs')
+            ax[n].set_xticks(np.arange(len(df[df.columns[n]]))) 
+
+    fig.tight_layout()
+    if display: plt.show()
+
+    fig.savefig(os.path.join('results', name, 'training.png'))
+    print('Image saved')
+
     plt.close()
