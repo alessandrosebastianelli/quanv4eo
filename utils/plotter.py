@@ -6,6 +6,14 @@ import os
 
 
 def plot_result(img, out):
+    '''
+        Plot the input image for the Quantum Convolution and relative output (feature map).
+
+        Inputs:
+            - img: the input image (channel last) for the quantum convolution
+            - out: the output feature maps (channel last) from the quantum convolution
+    '''
+
     fig, axes = plt.subplots(nrows = 2, ncols = out.shape[-1]+1, figsize = (2*(out.shape[-1]+1),4))
     axes[0,0].imshow(img, vmin = 0, vmax = 1)
     axes[0,0].axis('off')

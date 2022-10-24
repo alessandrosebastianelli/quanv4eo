@@ -3,6 +3,18 @@ from tqdm.auto import tqdm
 import numpy as np
 
 def dlv2(dataset, loader, classes):
+    '''
+        Test a data loader by loading all the images in the dataset, both to measure the time
+        and also to verify if all the images are correctly loaded. Produces a plot with the 
+        statistics.
+
+        Inputs:
+            - dataset: tuple containing images path and labels
+            - loader:  data loader to be tested
+            - classes: name of the classes, it is used for plotting reasons
+            
+    '''
+
     loader = iter(loader)
     x = dataset[0]
     y = dataset[1]
