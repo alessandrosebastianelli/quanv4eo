@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Input, Activation, Flatten, Dense, Conv2D, MaxPooling2D, Dropout
+from tensorflow.keras.layers import Input, Activation, Flatten, Dense, Conv2D, MaxPooling2D, Dropout, AveragePooling2D
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
@@ -52,11 +52,13 @@ class QCNNv1:
         '''
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
-        x   = MaxPooling2D(3)(x)
+        x   = AveragePooling2D(pool_size = 2, strides = 2)(x)
         x   = Flatten()(x)
         x   = Dropout(self.dropout)(x)
         x   = Dense(128, activation='relu')(x)
         x   = Dropout(self.dropout)(x)
+        x   = Dense(64,  activation='reu')(x)
+        x   = Dropout(self.dropout)(x) 
         x   = Dense(self.n_classes, activation='softmax')(x)
         
         model = Model(inputs=xin, outputs=x, name=self.name)

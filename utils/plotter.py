@@ -77,8 +77,6 @@ def plot_training(name, display = True, latest=False):
     results = glob.glob(os.path.join(path, '*'+os.sep))
     
     results.sort()
-    print(results)
-    
 
     if latest: results = results[-1]
 
