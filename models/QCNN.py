@@ -221,10 +221,10 @@ class QCNNv1:
                            'Paths':       paths})
         df.to_csv(training_res, index=False)
         print('{:<30s}{}'.format(name +' Results', training_res)) 
-        self.__confusion_matrix(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values())
+        self.__confusion_matrix_report(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values())
         
 
-    def __confusion_matrix(self, path, name, targets, predictions, classes, display = False):
+    def __confusion_matrix_report(self, path, name, targets, predictions, classes, display = False):
         #font = {'weight' : 'bold',
         #        'size'   : 12}
 
@@ -244,7 +244,14 @@ class QCNNv1:
         print('{:<30s}{}'.format('Confusion matrix saved', cf_path))
         plt.close()
         
-
+        
+        c_report = classification_report(targets, predictions, target_names=classes)
+        
+        report_path = os.path.join(path, name+'-report.txt')
+        with open(report_path, 'w') as f:
+            f.write(c_report)
+            
+        print('{:<30s}{}'.format('Classification report saved', report_path))
 
 
 
