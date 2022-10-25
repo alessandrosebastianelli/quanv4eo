@@ -34,6 +34,16 @@ class QCNNv1:
         self.n_classes = n_classes
         self.name = name
         if self.name == None: self.name = 'QCNNv1'
+
+        # Model Settings
+        self.loss         = qcnnv1s['loss']
+        self.metrics      = qcnnv1s['metrics']
+        self.learning_rate = qcnnv1s['learning_rate']
+        self.dropout      = qcnnv1s['dropout']
+        self.batch_size   = qcnnv1s['batch_size']
+        self.epochs       = qcnnv1s['epochs']
+        self.es_rounds    = qcnnv1s['early_stopping']
+
         self.model = self.__build() 
 
     def __build(self):
@@ -44,15 +54,15 @@ class QCNNv1:
         x   = Activation('relu')(xin)
         x   = MaxPooling2D(3)(x)
         x   = Flatten()(x)
-        x   = Dropout(qcnnv1s['dropout'])(x)
+        x   = Dropout(self.dropout)(x)
         x   = Dense(128, activation='relu')(x)
-        x   = Dropout(qcnnv1s['dropout'])(x)
+        x   = Dropout(self.dropout)(x)
         x   = Dense(self.n_classes, activation='softmax')(x)
         
         model = Model(inputs=xin, outputs=x, name=self.name)
-        model.compile(optimizer = Adam(learning_rate=qcnnv1s['learning_rate']),
-                      loss      = qcnnv1s['loss'],
-                      metrics   = qcnnv1s['metrics'])
+        model.compile(optimizer = Adam(learning_rate=self.learning_rate),
+                      loss      = self.loss,
+                      metrics   = self.metrics)
 
         return model
     
@@ -74,27 +84,27 @@ class QCNNv1:
 
         # Early Stopping to avoid overfitting
         es = EarlyStopping(monitor='val_loss', 
-                           patience=qcnnv1s['early_stopping'],
+                           patience=self.es_rounds,
                            mode='auto',
                            verbose=0,
                            baseline=None)
         
         # Training and Validation data loader
         train_gen = datareader.generator(train_dataset, 
-                                         qcnnv1s['batch_size'],
+                                         self.batch_size,
                                          self.img_shape,
                                          normalize=normalize)
         val_gen   = datareader.generator(val_dataset,
-                                         qcnnv1s['batch_size'],
+                                         self.batch_size,
                                          self.img_shape,
                                          normalize=normalize)
         # Model Training
         history = self.model.fit(
                 train_gen,
-                steps_per_epoch  = len(train_dataset[0])//qcnnv1s['batch_size'],
+                steps_per_epoch  = len(train_dataset[0])//self.batch_size,
                 validation_data  = val_gen,
-                validation_steps = len(val_dataset[0])//qcnnv1s['batch_size'],
-                epochs           = qcnnv1s['epochs'],
+                validation_steps = len(val_dataset[0])//self.batch_size,
+                epochs           = self.epochs,
                 callbacks        = [es])
     
         self.history = history
@@ -113,9 +123,37 @@ class QCNNv1:
         df = pd.DataFrame(history.history)
         df.to_csv(history_path, index=False)
         print('{:<30s}{}'.format('History Saved', history_path))
+        # Save model settings
+        self.__save_model_settings(path) 
         # Test model
         self.test(train_dataset, val_dataset, path, labels_mapper, normalize)
+    
+    def __save_model_settings(self, path):
+        
 
+        from io import StringIO
+        settings_path = os.path.join(path, 'settings.txt')
+        with open(settings_path, 'w') as f:
+            f.write('{:.^100}\n'.format('Model Settings'))
+            f.write('{:<30s}:{}\n'.format('Name',                  self.name))  
+            f.write('{:<30s}:{}\n'.format('Image Shape',           self.img_shape))  
+            f.write('{:<30s}:{}\n'.format('Loss Function',         self.loss))          
+            f.write('{:<30s}:{}\n'.format('Evaluation Metrics',    self.metrics))      
+            f.write('{:<30s}:{}\n'.format('Learning Rate',         self.learning_rate)) 
+            f.write('{:<30s}:{}\n'.format('Dropout',               self.dropout))
+            f.write('{:<30s}:{}\n'.format('Batch Size',            self.batch_size))   
+            f.write('{:<30s}:{}\n'.format('Epochs',                self.epochs))
+            f.write('{:<30s}:{}\n'.format('Early Stopping Rounds', self.es_rounds))    
+            
+
+            tmp_smry = StringIO()
+            self.model.summary(print_fn=lambda x: tmp_smry.write(x + '\n'))
+            summary = tmp_smry.getvalue()
+            f.write('{:.^100}\n'.format('Model Parameters'))
+            f.write(summary)
+
+        print('{:<30s}{}'.format('Model Settings Saved',settings_path))
+    
     def test(self, train_dataset, val_dataset, path, labels_mapper, normalize=None):
         '''
             Test the model and save results.

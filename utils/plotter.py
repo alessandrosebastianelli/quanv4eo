@@ -74,8 +74,11 @@ def plot_training(name, display = True, latest=False):
     '''
 
     path = os.path.join('results', name)
-    results = glob.glob(os.path.join(path, '*'))
+    results = glob.glob(os.path.join(path, '*'+os.sep))
+    
     results.sort()
+    print(results)
+    
 
     if latest: results = results[-1]
 
@@ -83,11 +86,11 @@ def plot_training(name, display = True, latest=False):
     nc = len(df.columns)
 
     # Plot history
-    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(len(df[df.columns[0]]), nc*3))
+    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(10*np.log(1+len(df[df.columns[0]])), nc*3))
     for result in results:
         df = pd.read_csv(os.path.join(result, 'history.csv')) 
         for n in range(nc):
-            df[df.columns[n]].plot(ax=ax[n], style='.-', label = result.split(os.sep)[-1])
+            df[df.columns[n]].plot(ax=ax[n], style='.-', label = result.split(os.sep)[-2])
             ax[n].set_title(df.columns[n])
             ax[n].legend()
             ax[n].set_xlabel('Epochs')
