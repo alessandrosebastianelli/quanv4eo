@@ -57,7 +57,7 @@ class QCNNv1:
         x   = Dropout(self.dropout)(x)
         x   = Dense(128, activation='relu')(x)
         x   = Dropout(self.dropout)(x)
-        x   = Dense(64,  activation='reu')(x)
+        x   = Dense(64,  activation='relu')(x)
         x   = Dropout(self.dropout)(x) 
         x   = Dense(self.n_classes, activation='softmax')(x)
         

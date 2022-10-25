@@ -4,7 +4,7 @@ qcnnv1s = {
             'metrics':         ['accuracy', 'mse'],
             'dropout':         0.2,
             'batch_size':      16,
-            'epochs':          5,
+            'epochs':          50,
             'early_stopping':  10
         }
 
