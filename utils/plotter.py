@@ -82,10 +82,9 @@ def plot_training(name, display = True, latest=False):
 
     df = pd.read_csv(os.path.join(results[0], 'history.csv'))
     nc = len(df.columns)
-    
-    size = 10*np.log(1+len(df[df.columns[0]]))
+    size = np.log(1+len(df[df.columns[0]]))
     # Plot history
-    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(size, size//nc))
+    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(5*size, len(results)*3*size))
     for result in results:
         df = pd.read_csv(os.path.join(result, 'history.csv')) 
         for n in range(nc):

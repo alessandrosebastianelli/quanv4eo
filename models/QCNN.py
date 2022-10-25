@@ -6,10 +6,14 @@ from tensorflow.keras.models import Model
 from data.datareader import datareader
 from .qconfig import *
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
+import matplotlib.pyplot as plt
 from datetime import datetime
 from tqdm.auto import tqdm
+from io import StringIO
 import pandas as pd
 import numpy as np
+import matplotlib
 import os
 
 class QCNNv1:
@@ -131,9 +135,13 @@ class QCNNv1:
         self.test(train_dataset, val_dataset, path, labels_mapper, normalize)
     
     def __save_model_settings(self, path):
-        
+        '''
+            Saves Model settings and summary to a file.
 
-        from io import StringIO
+            Input:
+                - path: path to save the file
+        '''
+        
         settings_path = os.path.join(path, 'settings.txt')
         with open(settings_path, 'w') as f:
             f.write('{:.^100}\n'.format('Model Settings'))
@@ -212,7 +220,31 @@ class QCNNv1:
                            'Targets':     np.argmax(targets, axis=-1),
                            'Paths':       paths})
         df.to_csv(training_res, index=False)
-        print('{:<30s}{}'.format(name +' Results', training_res))
+        print('{:<30s}{}'.format(name +' Results', training_res)) 
+        self.__confusion_matrix(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values())
+        
+
+    def __confusion_matrix(self, path, name, targets, predictions, classes, display = False):
+        #font = {'weight' : 'bold',
+        #        'size'   : 12}
+
+        #matplotlib.rc('font', **font)
+
+        fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize=(10,8))
+        cm = confusion_matrix(targets, predictions, normalize='true')
+        cmd = ConfusionMatrixDisplay(cm, display_labels=classes)
+        cmd.plot(ax = ax, xticks_rotation=90, cmap = 'Blues', values_format='.2f')
+        cmd.ax_.get_images()[0].set_clim(0, 1)
+        
+        fig.tight_layout()
+        if display: plt.show()
+
+        cf_path = os.path.join(path, name+'-cf.png')
+        fig.savefig(cf_path)
+        print('{:<30s}{}'.format('Confusion matrix saved', cf_path))
+        plt.close()
+        
+
 
 
 
