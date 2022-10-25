@@ -45,7 +45,7 @@ def plot_features_map(feat_maps):
 
     '''
 
-    fig, axes = plt.subplots(nrows = 2, ncols = feat_maps.shape[-1], figsize = (2*(feat_maps.shape[-1]+1),4))
+    fig, axes = plt.subplots(nrows = 2, ncols = feat_maps.shape[-1], figsize = (2*(feat_maps.shape[-1]+1), 4))
     
     for i in range(feat_maps.shape[-1]):
         axes[0,i].imshow(feat_maps[...,i], vmin = -1, vmax = 1)
@@ -82,9 +82,10 @@ def plot_training(name, display = True, latest=False):
 
     df = pd.read_csv(os.path.join(results[0], 'history.csv'))
     nc = len(df.columns)
-
+    
+    size = 10*np.log(1+len(df[df.columns[0]]))
     # Plot history
-    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(10*np.log(1+len(df[df.columns[0]])), nc*3))
+    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(size, size//nc))
     for result in results:
         df = pd.read_csv(os.path.join(result, 'history.csv')) 
         for n in range(nc):
