@@ -56,7 +56,7 @@ class QCNNv1:
         '''
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
-        x   = AveragePooling2D(pool_size = 2, strides = 2)(x)
+        x   = AveragePooling2D(pool_size = 3, strides = 2)(x)
         x   = Flatten()(x)
         x   = Dropout(self.dropout)(x)
         x   = Dense(128, activation='relu')(x)
