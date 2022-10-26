@@ -14,20 +14,23 @@ def dlv2(dataset, loader, classes):
             - classes: name of the classes, it is used for plotting reasons
             
     '''
-
+    # Transform the data loader into an iterator
     loader = iter(loader)
-    x = dataset[0]
-    y = dataset[1]
-
+    # Unpack the dataset
+    x = dataset[0] # Inputs
+    y = dataset[1] # Labels
+    
+    # Count will collect the number of samples for each class
     count = np.zeros(len(y[0]))
     
+    # Load dataset
     for i in tqdm(range(len(x)), desc='Reading Image', colour='black'):
         (xi,yi,pi) = next(loader)
         count[np.argmax(yi)] += 1
-
+    
+    # Barh plot for variable Count
     yy = len(y[0])
     xx = np.arange(yy)
-
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(2*yy/3, 4))
     ax.barh(xx, count, color='black')
     for i in range(len(count)):
