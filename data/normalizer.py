@@ -98,8 +98,7 @@ class normalizer:
             Apply the standardizer to the input data. The formula is:
             
             out = (data - mean)/standard deviation         (1)
-            
-            
+             
             Inputs:
                 - data: a WxHxB image, with W width, H height and B bands            
                 - mmean (optional): the mean in equation (1)
