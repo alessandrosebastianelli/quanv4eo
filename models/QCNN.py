@@ -225,11 +225,17 @@ class QCNNv1:
         
 
     def __confusion_matrix_report(self, path, name, targets, predictions, classes, display = False):
-        #font = {'weight' : 'bold',
-        #        'size'   : 12}
+        '''
+            Plot the confusion matrix and compute the classification report.
 
-        #matplotlib.rc('font', **font)
-
+            Inputs:
+                - path:        path to save confusion matrix and classification report
+                - name:        name of the dataset
+                - targets:     image labels
+                - predictions: model predictions
+                - classes:     name of the classes
+                - display:     if true plot the confusion matrix
+        '''
         fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize=(10,8))
         cm = confusion_matrix(targets, predictions, normalize='true')
         cmd = ConfusionMatrixDisplay(cm, display_labels=classes)
