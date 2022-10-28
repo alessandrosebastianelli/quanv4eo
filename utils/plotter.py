@@ -84,6 +84,7 @@ def plot_training(name, display = True, latest=False):
     # List all the training snapshots inside the folder results/name
     path = os.path.join('results', name)
     results = glob.glob(os.path.join(path, '*'+os.sep))
+    results.sort()
     # It true pop all the snapshots except the last one
     if latest: results = results[-1]
 
