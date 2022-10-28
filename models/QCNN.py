@@ -72,7 +72,7 @@ class QCNNv1:
 
         return model
     
-    def train_test(self, train_dataset, val_dataset, labels_mapper, normalize=None):
+    def train_test(self, train_dataset, val_dataset, labels_mapper, normalize=None, verbose=0):
         '''
             Train and test the model.
 
@@ -86,6 +86,7 @@ class QCNNv1:
              - labels_mapper: dictionary mapping the predicted classes (one hot encoded) into
                               class names
              - normalize:     if true apply normalization (used by data loaders)
+             - verbose:       verbose for training (0 silent, 1 progressbar, 2 loss)
         '''
 
         # Early Stopping to avoid overfitting
@@ -111,7 +112,8 @@ class QCNNv1:
                 validation_data  = val_gen,
                 validation_steps = len(val_dataset[0])//self.batch_size,
                 epochs           = self.epochs,
-                callbacks        = [es])
+                callbacks        = [es],
+                verbose          = verbose)
     
         self.history = history
         
@@ -186,7 +188,9 @@ class QCNNv1:
                                          normalize=normalize))
 
         # Training Results
+        print('Testing model on training set')
         self.__make_pred(train_dataset, train_gen, path, 'training', labels_mapper)
+        print('Testing model on valdiation set')
         self.__make_pred(val_dataset,   val_gen,   path, 'validation', labels_mapper)
 
     def __make_pred(self, dataset, iterator, path, name, labels_mapper):
