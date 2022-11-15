@@ -18,7 +18,7 @@ class QConv2D:
         Quantum Convolution 2D
     '''
 
-    def __init__(self, circuit, filters, kernel_size, stride, parallelize=0):
+    def __init__(self, circuits, filters, kernel_size, stride, parallelize=0):
         '''
             Quantum Convolution 2D layer:
             
@@ -28,7 +28,7 @@ class QConv2D:
             - stride: value for stride in convolution
             - parallelize: if == 0 no parallelization, otherwise parallize with workers=parallelize
         '''
-        self.circuit     = circuit
+        self.circuits    = circuits
         self.filters     = filters
         self.kernel_size = kernel_size
         self.stride      = stride
@@ -44,10 +44,17 @@ class QConv2D:
                 - quantum convolved image: a 3D chanell-last matrix in R^(wc,hc,f), wc: width, hc: height, f:channels
         '''
         # There are two versions, one parellelized an one not
-        if self.parallelize == 0:
-            return self.__qConv2D(image, verbose)
-        else:
-            return self.par_qConv2D(image, self.circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose)
+        
+        results = []
+        for circuit in self.circuits:
+            if self.parallelize == 0:
+                results.appendself.__qConv2D(image, circuit, verbose)
+            else:
+                results.append(self.par_qConv2D(image, circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose))
+        
+        results = np.moveaxis(results, 0, -1)
+        s = np.shape(results)
+        return np.reshape(results, (s[0], s[1], s[2]*s[3]))
     
     @staticmethod
     def par_qConv2D(image, qcircuit, filters, ksize, stride, njobs, verbose):
@@ -123,7 +130,7 @@ class QConv2D:
             
         return q_results
 
-    def __qConv2D(self, image, verbose):
+    def __qConv2D(self, image, qcircuit, verbose):
 
         '''
             Non parallelized quantum convolution.
@@ -152,7 +159,7 @@ class QConv2D:
                     # with the quantum circuit stride*stride
                     p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
 
-                    q_results = self.circuit(p.reshape(-1))
+                    q_results = qcircuit(p.reshape(-1))
 
                     for k in range(self.filters):
                         out[cty, ctx, c, k] = q_results[k]
