@@ -2,7 +2,7 @@ from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 import numpy as np
 
-def unwrap_self(image, c, j, i, qcircuit, filters, ksize):
+def unwrap_self(image, c, j, i, qcircuit, ksize):
     '''
         Joblib or Multiprocessing is based on pickling to pass functions around to achieve parallelization. 
         In order to pickle the object, this object must capable of being referred to in the global context for
@@ -11,7 +11,7 @@ def unwrap_self(image, c, j, i, qcircuit, filters, ksize):
         (http://qingkaikong.blogspot.com/2016/12/python-parallel-method-in-class.html) 
         is to create a function outside the class to unpack the self from the arguments and calls the function again.
     '''
-    return QConv3D.qConv3D2(image, c, j, i, qcircuit, filters, ksize)
+    return QConv3D.qConv3D2(image, c, j, i, qcircuit, ksize)
 
 class QConv3D:
     '''
@@ -88,7 +88,7 @@ class QConv3D:
         w_out = (w-ksize) // stride + 1 
         # Embedding x and y spatial loops and the spectral loop into Joblib
         res = Parallel(n_jobs=njobs)( 
-            delayed(unwrap_self)(image, c, j, i, qcircuit, filters, ksize) 
+            delayed(unwrap_self)(image, c, j, i, qcircuit, ksize) 
             for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False, colour='black')
             for i in range(0, w-ksize, stride)
             for c in range(ch)
@@ -104,7 +104,7 @@ class QConv3D:
         return res
     
     @staticmethod
-    def qConv3D2(image, c, j, i, qcircuit, filters, ksize):
+    def qConv3D2(image, c, j, i, qcircuit, ksize):
         '''
             ###########################################################################
             # !!! This method is ment to be private, use the .apply method insted !!! #
