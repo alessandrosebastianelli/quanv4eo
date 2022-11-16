@@ -48,13 +48,13 @@ class QConv2D:
         results = []
         for circuit in self.circuits:
             if self.parallelize == 0:
-                results.appendself.__qConv2D(image, circuit, verbose)
+                results.append(self.__qConv2D(image, circuit, verbose))
             else:
                 results.append(self.par_qConv2D(image, circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose))
         
         results = np.moveaxis(results, 0, -1)
         s = np.shape(results)
-        return np.reshape(results, (s[0], s[1], s[2]*s[3]))
+        return np.reshape(results, (s[0], s[1], s[-2]*s[-1]))
     
     @staticmethod
     def par_qConv2D(image, qcircuit, filters, ksize, stride, njobs, verbose):

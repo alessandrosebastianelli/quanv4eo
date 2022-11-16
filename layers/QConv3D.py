@@ -18,7 +18,7 @@ class QConv3D:
         Quantum Convolution 2D
     '''
 
-    def __init__(self, circuit, filters, kernel_size, stride, parallelize=0, reshape=True):
+    def __init__(self, circuits, filters, kernel_size, stride, parallelize=0, reshape=True):
         '''
             Quantum Convolution 2D layer:
             
@@ -29,7 +29,7 @@ class QConv3D:
             - parallelize: if == 0 no parallelization, otherwise parallize with workers=parallelize
             - rehspae: if True will merge the features maps for each chanell
         '''
-        self.circuit     = circuit
+        self.circuits    = circuits
         self.filters     = filters
         self.kernel_size = kernel_size
         self.stride      = stride
@@ -46,11 +46,18 @@ class QConv3D:
                 - quantum convolved image: a 3D chanell-last matrix in R^(wc,hc,f), wc: width, hc: height, f:channels
         '''
         # There are two versions, one parellelized an one not
-        if self.parallelize == 0:
-            return self.__qConv3D(image, verbose, self.reshape)
-        else:
-            return self.par_qConv3D(image, self.circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose, self.reshape)
-    
+
+        results = []
+        for circuit in self.circuits:
+            if self.parallelize == 0:
+                results.append(self.__qConv3D(image, circuit, verbose, self.reshape))
+            else:
+                results.append(self.par_qConv3D(image, circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose, self.reshape))
+        
+        results = np.moveaxis(results, 0, -1)
+        s = np.shape(results)
+        return np.reshape(results, (s[0], s[1], s[-2]*s[-1]))
+
     @staticmethod
     def par_qConv3D(image, qcircuit, filters, ksize, stride, njobs, verbose, reshape):
         '''
@@ -125,7 +132,7 @@ class QConv3D:
             
         return q_results
 
-    def __qConv3D(self, image, verbose, reshape):
+    def __qConv3D(self, image, qcircuit, verbose, reshape):
 
         '''
             Non parallelized quantum convolution.
@@ -154,7 +161,7 @@ class QConv3D:
                     # with the quantum circuit stride*stride
                     p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
 
-                    q_results = self.circuit(p.reshape(-1))
+                    q_results = qcircuit(p.reshape(-1))
 
                     for k in range(self.filters):
                         out[cty, ctx, c, k] = q_results[k]
