@@ -1,6 +1,18 @@
 # Quantum Convolutional Neural Networks
 
-This repository contains my implementation of Quanvolutional Neural Network presented by [1]. With respect to [1], this implementation is more flexible, allows to change the quantum circuit strcuture, the kernel size, the stride and the output filters. This implementation allows also to use images with more channels and to stack multiple Quantum Convolutional 2D layers.
+This repository contains a novel implementation of Quanvolutional Neural Network presented by [1]. 
+
+
+With respect to [1], this implementation allows to:
+
+-  change the quantum circuit strcuture
+-  change the kernel size, the stride and the number of output filters
+-  use image with more channels
+-  stack multiple Quanvolutional layers
+-  to use more quantum circuits (to make a parallel it means to apply more quantum kernels to one image)
+
+This implementation contains both Conv2D and Conv2D quantum layers, both can be used in normal mode and in parallel (to speed up the processing).
+
 
 ## Contents
 
