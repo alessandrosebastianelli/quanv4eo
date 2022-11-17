@@ -46,6 +46,7 @@ class datahandler:
             Input
                 - root: root path of the dataset
         '''
+
         self.root = root
         self.paths = self.__load_paths()
 
@@ -56,6 +57,7 @@ class datahandler:
             Output:
                 - paths: python dictionary, keys==classes, values==paths
         '''
+
         classes_raw = glob.glob(os.path.join(self.root, '*'))
 
         paths = {}
@@ -78,7 +80,7 @@ class datahandler:
         if paths == None: paths = self.paths   
         if name  == None: name = "No name"
         
-        print('===================================================')
+        print('{:=^100}\n'.format(''))
         print('Dataset {}\n'.format(name))
         for i, c in enumerate(paths.keys()): print('Class {} - {:<25s} - #images: {}'.format(i,c,len(paths[c])))
 
