@@ -156,7 +156,6 @@ class QCNNv1:
             f.write('{:<30s}:{}\n'.format('Batch Size',            self.batch_size))   
             f.write('{:<30s}:{}\n'.format('Epochs',                self.epochs))
             f.write('{:<30s}:{}\n'.format('Early Stopping Rounds', self.es_rounds))    
-            
 
             tmp_smry = StringIO()
             self.model.summary(print_fn=lambda x: tmp_smry.write(x + '\n'))
@@ -210,10 +209,10 @@ class QCNNv1:
         targets     = np.zeros(np.shape(dataset[1]))
         paths       = []
 
+        # Iterate through the dataset (can be training or validation)
         for i in tqdm(range(len(dataset[0]))):
             x, y, ps = next(iterator)
             p = self.model.predict(x[np.newaxis,...], verbose = 0)
-
             predictions[i] = p[0]
             targets[i]     = y
             paths.append(ps)
@@ -240,6 +239,8 @@ class QCNNv1:
                 - classes:     name of the classes
                 - display:     if true plot the confusion matrix
         '''
+
+        # Plot the Confusion Matrix
         fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize=(10,8))
         cm = confusion_matrix(targets, predictions, normalize='true')
         cmd = ConfusionMatrixDisplay(cm, display_labels=classes)
@@ -254,7 +255,7 @@ class QCNNv1:
         print('{:<30s}{}'.format('Confusion matrix saved', cf_path))
         plt.close()
         
-        
+        # Calculate the Classification Report
         c_report = classification_report(targets, predictions, target_names=classes)
         
         report_path = os.path.join(path, name+'-report.txt')
