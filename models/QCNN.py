@@ -162,15 +162,24 @@ class QCNNv1:
         settings_path = os.path.join(path, 'settings.txt')
         with open(settings_path, 'w') as f:
             f.write('{:.^100}\n'.format('Model Settings'))
-            f.write('{:<30s}:{}\n'.format('Name',                  self.name))  
-            f.write('{:<30s}:{}\n'.format('Image Shape',           self.img_shape))  
-            f.write('{:<30s}:{}\n'.format('Loss Function',         self.loss))          
-            f.write('{:<30s}:{}\n'.format('Evaluation Metrics',    self.metrics))      
-            f.write('{:<30s}:{}\n'.format('Learning Rate',         self.learning_rate)) 
-            f.write('{:<30s}:{}\n'.format('Dropout',               self.dropout))
-            f.write('{:<30s}:{}\n'.format('Batch Size',            self.batch_size))   
-            f.write('{:<30s}:{}\n'.format('Epochs',                self.epochs))
-            f.write('{:<30s}:{}\n'.format('Early Stopping Rounds', self.es_rounds))    
+            f.write('{:<30s}:{}\n'.format('Name',                    self.name))  
+            f.write('{:<30s}:{}\n'.format('Image Shape',             self.img_shape))
+
+            for key, value in qcnnv1s.items():
+                f.write('{:<30s}:{}\n'.format(key, value))          
+            
+            #f.write('{:<30s}:{}\n'.format('Loss Function',           self.loss))          
+            #f.write('{:<30s}:{}\n'.format('Evaluation Metrics',      self.metrics))      
+            #f.write('{:<30s}:{}\n'.format('Learning Rate',           self.learning_rate)) 
+            #f.write('{:<30s}:{}\n'.format('Dropout',                 self.dropout))
+            #f.write('{:<30s}:{}\n'.format('Batch Size',              self.batch_size))   
+            #f.write('{:<30s}:{}\n'.format('Epochs',                  self.epochs))
+            #f.write('{:<30s}:{}\n'.format('Dense Layers',            self.dense))
+            #f.write('{:<30s}:{}\n'.format('Convolutional Layers',    self.conv))
+            #f.write('{:<30s}:{}\n'.format('Kernel Size Convolution', self.kernel))
+            #f.write('{:<30s}:{}\n'.format('Strides Convolution',     self.stride))
+            #f.write('{:<30s}:{}\n'.format('Kernel Size Pooling',     self.pool_size))
+            #f.write('{:<30s}:{}\n'.format('Strides Pooling',         self.pool_stride))    
 
             tmp_smry = StringIO()
             self.model.summary(print_fn=lambda x: tmp_smry.write(x + '\n'))
