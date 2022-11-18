@@ -240,7 +240,6 @@ class QCNNv1:
         df.to_csv(training_res, index=False)
         print('{:<30s}{}'.format(name +' Results', training_res)) 
         self.__confusion_matrix_report(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values())
-        
 
     def __confusion_matrix_report(self, path, name, targets, predictions, classes, display = False):
         '''
