@@ -18,8 +18,8 @@ This implementation contains both Conv2D and Conv2D quantum layers, both can be 
 The repository contains several jupyter notebook that must be runned in a precise order
 
 1. [Quantum Convolutional Processing](QuantumConvolutionalProcessing.ipynb): this notebook shows how to load a dataset, how to apply quantum convolution to precces it and how to save results
-2. [Quantum Convolutional Neural Networks](QuantumConvolutionalNeuralNetworks.ipynb): this notebook loads the quantum processed dataset and run the classification of the dataset
-3.  
+2. [Multi Quantum Convolutional Processing](MultiQuantumConvolutionalProcessing.ipynb): this notebook shows how to load a dataset, how to apply quantum convolution with more quantum kernels to precces it and how to save results
+3. [Quantum Convolutional Neural Networks](QuantumConvolutionalNeuralNetworks.ipynb): this notebook loads the quantum processed dataset and run the classification of the dataset
 
 
 ### References
