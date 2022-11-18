@@ -22,7 +22,7 @@ The repository contains several jupyter notebook that must be runned in a precis
 3.  
 
 
-k### *References*
+### References
 
 [1] Henderson, M., Shakya, S., Pradhan, S., & Cook, T. (2020). Quanvolutional neural networks: powering image recognition with quantum circuits. Quantum Machine Intelligence, 2(1), 1-9.
 
