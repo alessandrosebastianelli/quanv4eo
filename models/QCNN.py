@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Input, Activation, Flatten, Dense, Conv2D, MaxPooling2D, Dropout, AveragePooling2D
+from tensorflow.keras.layers import Input, Activation, Flatten, Dense, Conv2D, Dropout, AveragePooling2D
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
@@ -13,7 +13,6 @@ from tqdm.auto import tqdm
 from io import StringIO
 import pandas as pd
 import numpy as np
-import matplotlib
 import os
 
 class QCNNv1:
@@ -40,13 +39,19 @@ class QCNNv1:
         if self.name == None: self.name = 'QCNNv1'
 
         # Model Settings
-        self.loss         = qcnnv1s['loss']
-        self.metrics      = qcnnv1s['metrics']
+        self.loss          = qcnnv1s['loss']
+        self.metrics       = qcnnv1s['metrics']
         self.learning_rate = qcnnv1s['learning_rate']
-        self.dropout      = qcnnv1s['dropout']
-        self.batch_size   = qcnnv1s['batch_size']
-        self.epochs       = qcnnv1s['epochs']
-        self.es_rounds    = qcnnv1s['early_stopping']
+        self.dropout       = qcnnv1s['dropout']
+        self.batch_size    = qcnnv1s['batch_size']
+        self.epochs        = qcnnv1s['epochs']
+        self.es_rounds     = qcnnv1s['early_stopping']
+        self.dense         = qcnnv1s['dense']
+        self.conv          = qcnnv1s['conv']
+        self.kernel        = qcnnv1s['kernel']
+        self.stride        = qcnnv1s['stride']
+        self.pool_size     = qcnnv1s['pool_size']
+        self.pool_stride   = qcnnv1s['pool_stride']
 
         self.model = self.__build() 
 
@@ -54,14 +59,24 @@ class QCNNv1:
         '''
             This method builds the QCNN.
         '''
+
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
-        x   = AveragePooling2D(pool_size = 3, strides = 2)(x)
+        x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
+
+        # Convolutional Layers
+        for conv in self.conv:
+            x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu')(x)
+            x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
+        
         x   = Flatten()(x)
-        x   = Dropout(self.dropout)(x)
-        x   = Dense(128, activation='relu')(x)
-        x   = Dropout(self.dropout)(x)
-        x   = Dense(64,  activation='relu')(x)
+        
+        # Dense Layers
+        for dense in self.dense:
+            x   = Dropout(self.dropout)(x)
+            x   = Dense(dense, activation='relu')(x)
+
+        # Final Dense Layer
         x   = Dropout(self.dropout)(x) 
         x   = Dense(self.n_classes, activation='softmax')(x)
         
