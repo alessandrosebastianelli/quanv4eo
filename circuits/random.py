@@ -3,7 +3,7 @@ import pennylane as qml
 import numpy as np
 
 
-def ry_random(qubits, kernel_size, filters, n_layers):
+def ry_random(qubits, kernel_size, filters, n_layers, seed=1):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -30,18 +30,18 @@ def ry_random(qubits, kernel_size, filters, n_layers):
     rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
 
     @qml.qnode(dev)
-    def circuit(phi):
+    def circuit(phi, seed=seed):
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
             qml.RY(np.pi * phi[j], wires=j)
         # Random quantum circuit
-        RandomLayers(rand_params, wires=list(range(qubits)))
+        RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
     return circuit
 
-def rx_random(qubits, kernel_size, filters, n_layers):
+def rx_random(qubits, kernel_size, filters, n_layers, seed=1):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -68,18 +68,18 @@ def rx_random(qubits, kernel_size, filters, n_layers):
     rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
 
     @qml.qnode(dev)
-    def circuit(phi):
+    def circuit(phi, seed=seed):
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
             qml.RX(np.pi * phi[j], wires=j)
         # Random quantum circuit
-        RandomLayers(rand_params, wires=list(range(qubits)))
+        RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
     return circuit
 
-def rz_random(qubits, kernel_size, filters, n_layers):
+def rz_random(qubits, kernel_size, filters, n_layers, seed=1):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -106,12 +106,12 @@ def rz_random(qubits, kernel_size, filters, n_layers):
     rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
 
     @qml.qnode(dev)
-    def circuit(phi):
+    def circuit(phi, seed=seed):
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
             qml.RZ(np.pi * phi[j], wires=j)
         # Random quantum circuit
-        RandomLayers(rand_params, wires=list(range(qubits)))
+        RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
