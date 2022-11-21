@@ -1,13 +1,11 @@
 from data.datahandler import datahandler
 from data.datareader import datareader
 from layers.QConv3D import QConv3D
-from utils import test_loader
+from datetime import datetime
 from circuits.random import *
 from utils.plotter import *
 
-import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
-import pennylane as qml
 import numpy as np
 import os
 
@@ -42,9 +40,9 @@ for i, dataset_name in enumerate(datasets_path):
     SEED = i
     np.random.seed(SEED)
 
-    circuits = [ry_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS),
-                rx_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS),
-                rz_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS),]
+    circuits = [ry_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),
+                rx_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),
+                rz_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),]
 
     conv1 = QConv3D(
         circuits,
@@ -57,8 +55,7 @@ for i, dataset_name in enumerate(datasets_path):
     #==========================================================================================
     # Apply the Quantum circuit
     #==========================================================================================
-
-    new_name = dataset_name+'_processed'
+    new_name = dataset_name+'_processed_'+datetime.now().strftime("%d-%m-%Y-%H:%M:%S")
     # Create folder structures
     root2 = root.replace(dataset_name, new_name)
     for path in dhandler.paths.keys():
@@ -74,6 +71,3 @@ for i, dataset_name in enumerate(datasets_path):
         # Save the results
         with open(pi, 'wb') as f:
             np.save(f, out1)
-    
-
-
