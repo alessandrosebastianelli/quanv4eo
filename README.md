@@ -22,6 +22,13 @@ The repository contains several jupyter notebook that must be runned in a precis
 3. [Quantum Convolutional Neural Networks](QuantumConvolutionalNeuralNetworks.ipynb): this notebook loads the quantum processed dataset and run the classification of the dataset
 
 
+Similary there are python file that coresponds to the notebooks:
+
+1. [Quantum Convolutional Processing](qconv-1cXdataset.py): this python script shows how to load a dataset, how to apply quantum convolution to precces it and how to save results
+2. [Multi Quantum Convolutional Processing](qconv-1cXclass.py): this python script shows how to load a dataset, how to apply quantum convolution with more quantum kernels to precces it and how to save results
+
+
+
 ### References
 
 [1] Henderson, M., Shakya, S., Pradhan, S., & Cook, T. (2020). Quanvolutional neural networks: powering image recognition with quantum circuits. Quantum Machine Intelligence, 2(1), 1-9.
