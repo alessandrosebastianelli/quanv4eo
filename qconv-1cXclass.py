@@ -1,6 +1,7 @@
 from data.datahandler import datahandler
 from data.datareader import datareader
 from layers.QConv3D import QConv3D
+from layers.QConv2D import QConv2D
 from datetime import datetime
 from circuits.random import *
 from utils.plotter import *
@@ -40,11 +41,9 @@ for i, dataset_name in enumerate(datasets_path):
     SEED = i
     np.random.seed(SEED)
 
-    circuits = [ry_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),
-                rx_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),
-                rz_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED),]
+    circuits = [ry_random(QUBITS, KERNEL_SIZE, FILTERS, N_LAYERS, SEED)]
 
-    conv1 = QConv3D(
+    conv1 = QConv2D(
         circuits,
         FILTERS, 
         KERNEL_SIZE, 
