@@ -2,7 +2,9 @@ from pennylane.templates import RandomLayers
 import pennylane as qml
 import numpy as np
 
-
+##### Jax & Pennylane
+# https://pennylane.ai/qml/demos/tutorial_jax_transformations.html
+#####
 import jax
 from jax.config import config
 config.update('jax_enable_x64', True)
