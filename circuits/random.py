@@ -5,7 +5,7 @@ import numpy as np
 
 import jax
 from jax.config import config
-confgi.update('jax_enable_x64', True)
+config.update('jax_enable_x64', True)
 
 @jax.jit
 def ry_random(qubits, kernel_size, filters, n_layers, key=jax.random.PRNGKey(0), seed=1):
@@ -32,7 +32,7 @@ def ry_random(qubits, kernel_size, filters, n_layers, key=jax.random.PRNGKey(0),
 
     # Notice how the device construction now happens within the jitted method.
     # Also note the added '.jax' to the device path.
-    
+
     dev = qml.device("default.qubit.jax", wires=2, shots=10, prng_key=key)
     # Random circuit parameters
     rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
