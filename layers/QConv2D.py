@@ -1,8 +1,10 @@
+from circuits.random import ry_random, rx_random, rz_random
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 import numpy as np
+import jax.numpy as jnp
 
-def unwrap_self(image, c, j, i, qcircuit, ksize):
+def unwrap_self(image, c, j, i, qubits, ksize, filters, nlayers, seed):
     '''
         Joblib or Multiprocessing is based on pickling to pass functions around to achieve parallelization. 
         In order to pickle the object, this object must capable of being referred to in the global context for
@@ -11,14 +13,14 @@ def unwrap_self(image, c, j, i, qcircuit, ksize):
         (http://qingkaikong.blogspot.com/2016/12/python-parallel-method-in-class.html) 
         is to create a function outside the class to unpack the self from the arguments and calls the function again.
     '''
-    return QConv2D.qConv2D2(image, c, j, i, qcircuit, ksize)
+    return QConv2D.qConv2D2(image, c, j, i, qubits, ksize, filters, nlayers, seed)
 
 class QConv2D:
     '''
         Quantum Convolution 2D
     '''
 
-    def __init__(self, circuits, filters, kernel_size, stride, parallelize=0):
+    def __init__(self, qubits, filters, kernel_size, stride, parallelize=0, nlayers=1, seed=0):
         '''
             Quantum Convolution 2D layer:
             
@@ -28,11 +30,13 @@ class QConv2D:
             - stride: value for stride in convolution
             - parallelize: if == 0 no parallelization, otherwise parallize with workers=parallelize
         '''
-        self.circuits    = circuits
+        self.qubits      = qubits
         self.filters     = filters
         self.kernel_size = kernel_size
         self.stride      = stride
         self.parallelize = parallelize
+        self.nlayers     = nlayers 
+        self.seed        = seed
 
     def apply(self, image, verbose=False):
         '''
@@ -46,18 +50,18 @@ class QConv2D:
         # There are two versions, one parellelized an one not
         
         results = []
-        for circuit in self.circuits:
-            if self.parallelize == 0:
-                results.append(self.__qConv2D(image, circuit, verbose))
-            else:
-                results.append(self.par_qConv2D(image, circuit, self.filters, self.kernel_size, self.stride, self.parallelize, verbose))
+
+        if self.parallelize == 0:
+            results.append(self.__qConv2D(image, verbose))
+        else:
+            results.append(self.par_qConv2D(image, self.kernel_size, self.stride, self.qubits, self.filters, self.nlayers, self.seed, self.parallelize, verbose))
         
         results = np.moveaxis(results, 0, -1)
         s = np.shape(results)
         return np.reshape(results, (s[0], s[1], s[-2]*s[-1]))
     
     @staticmethod
-    def par_qConv2D(image, qcircuit, filters, ksize, stride, njobs, verbose):
+    def par_qConv2D(image, ksize, stride, qubits, filters, nlayers, seed, njobs, verbose):
         '''
             ###########################################################################
             # !!! This method is ment to be private, use the .apply method insted !!! #
@@ -86,7 +90,7 @@ class QConv2D:
         w_out = (w-ksize) // stride + 1 
         # Embedding x and y spatial loops and the spectral loop into Joblib
         res = Parallel(n_jobs=njobs)( 
-            delayed(unwrap_self)(image, c, j, i, qcircuit, ksize) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False, colour='black')
+            delayed(unwrap_self)(image, c, j, i, qubits, ksize, filters, nlayers, seed) for j in tqdm(range(0, h-ksize, stride), disable=not(verbose), leave=False, colour='black')
             for i in range(0, w-ksize, stride)
             for c in range(ch)
         )
@@ -102,7 +106,7 @@ class QConv2D:
         return res
     
     @staticmethod
-    def qConv2D2(image, c, j, i, qcircuit, ksize):
+    def qConv2D2(image, c, j, i, qubits, ksize, filters, nlayers, seed):
         '''
             ###########################################################################
             # !!! This method is ment to be private, use the .apply method insted !!! #
@@ -123,14 +127,14 @@ class QConv2D:
         '''
        #out = np.zeros((filters))
         p = image[j:j+ksize, i:i+ksize, c]
-        q_results = qcircuit(p.reshape(-1))
+        q_results = ry_random(jnp.array(p.reshape(-1)), qubits, ksize, filters, nlayers, seed)
         
         #for k in range(filters):
         #    out[k] = q_results[k]
             
-        return q_results
+        return np.array(q_results)
 
-    def __qConv2D(self, image, qcircuit, verbose):
+    def __qConv2D(self, image, verbose):
 
         '''
             Non parallelized quantum convolution.
@@ -159,7 +163,9 @@ class QConv2D:
                     # with the quantum circuit stride*stride
                     p = image[j:j+self.kernel_size, i:i+self.kernel_size, c]
 
-                    q_results = qcircuit(p.reshape(-1))
+                    q_results = ry_random(jnp.array(p.reshape(-1)), self.qubits, self.kernel_size, self.filters, self.nlayers, self.seed)
+                    
+                    q_results = np.array(q_results)
 
                     for k in range(self.filters):
                         out[cty, ctx, c, k] = q_results[k]
