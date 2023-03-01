@@ -63,11 +63,12 @@ class QCNNv1:
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
         x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
-
-        # Convolutional Layers
-        for conv in self.conv:
-            x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu')(x)
-            x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
+        
+        if self.conv is not None:
+            # Convolutional Layers
+            for conv in self.conv:
+                x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu')(x)
+                x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
         
         x   = Flatten()(x)
         
