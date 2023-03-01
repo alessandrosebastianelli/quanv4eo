@@ -1,4 +1,5 @@
-from circuits.random import ry_random, rx_random, rz_random
+from circuits.random import *
+from circuits.custom import *
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 import numpy as np
@@ -135,7 +136,8 @@ class QConv2D:
             q_results = rx_random(jnp.array(p.reshape(-1)), qubits, ksize, filters, nlayers, seed)
         elif circuit == 'rz':
             q_results = rz_random(jnp.array(p.reshape(-1)), qubits, ksize, filters, nlayers, seed)
-        
+        elif circuit == 'rxyz':
+            q_results = rxyz_custom(jnp.array(p.reshape(-1)), qubits, ksize, filters, nlayers, seed)
         #for k in range(filters):
         #    out[k] = q_results[k]
             
@@ -176,6 +178,8 @@ class QConv2D:
                         q_results = rx_random(jnp.array(p.reshape(-1)), self.qubits, self.kernel_size, self.filters, self.nlayers, self.seed)
                     elif self.circuit == 'rz':
                         q_results = rz_random(jnp.array(p.reshape(-1)), self.qubits, self.kernel_size, self.filters, self.nlayers, self.seed)
+                    elif self.circuit == 'rxyz':
+                        q_results = rxyz_custom(jnp.array(p.reshape(-1)), self.qubits, self.kernel_size, self.filters, self.nlayers, self.seed)
                         
                     q_results = np.array(q_results)
 
