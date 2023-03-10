@@ -31,8 +31,8 @@ def plot_result(img, out):
     # Iterates through all the features map
     for i in range(out.shape[-1]):
         # Plot the i-th feature map
-        axes[0,i+1].imshow(out[...,i], vmin = -1, vmax = 1)
-        axes[0,i+1].set_title('QCNN - F. Map {}'.format(i))
+        axes[0,i+1].imshow(out[...,i], vmin = -1, vmax = 1, cmap = 'magma')
+        axes[0,i+1].set_title('Feature Map {}'.format(i+1))
         axes[0,i+1].axis('off')
         # Plot the histogram of the i-th feature map
         axes[1,i+1].hist(out[...,i].flatten(), 60, color='black')
@@ -57,7 +57,7 @@ def plot_features_map(feat_maps):
     for i in range(feat_maps.shape[-1]):
         # Plot the i-th feature map
         axes[0,i].imshow(feat_maps[...,i], vmin = -1, vmax = 1)
-        axes[0,i].set_title('QCNN - F. Map {}'.format(i))
+        axes[0,i].set_title('Feature Map {}'.format(i+1))
         axes[0,i].axis('off')
         # Plot the histogram of the i-th feature map
         axes[1,i].hist(feat_maps[...,i].flatten(), 60, color='black')
