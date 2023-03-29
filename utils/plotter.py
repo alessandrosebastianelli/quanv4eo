@@ -1,9 +1,14 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import matplotlib
 import glob
 import os
 
+font = {'weight' : 'bold',
+        'size'   : 13}
+
+matplotlib.rc('font', **font)
 
 def plot_result(img, out):
     '''
