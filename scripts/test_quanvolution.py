@@ -7,6 +7,7 @@ from layers.QConv2D import QConv2D
 import numpy as np
 import argparse
 import time
+import os
 
 import jax; jax.config.update('jax_platform_name', 'cpu')
 
@@ -32,13 +33,12 @@ def quanvolution(IMG_SHAPE, QUBITS, FILTERS, KERNEL_SIZE, STRIDE, NUM_JOBS, CIRC
 
     img = np.zeros(IMG_SHAPE)
     
-    for i in range(10):
-        if i == 1:
-            start = time.time()
+    start = time.time()
+    for i in range(100):
         out = conv1.apply(img)
     end = time.time()
     
-    t = (end-start)/9
+    t = (end-start)/100
     return t
 
 if __name__ == '__main__':
@@ -56,5 +56,12 @@ if __name__ == '__main__':
     
     t = quanvolution(tuple(args.img_shape), args.qubits, args.filters, args.kernel_size, args.stride, args.num_jobs, args.circuit)
     
+    if not os.path.isfile('results.csv'):
+        colnames = 'imgsize,qubits,filters,kernelsize,stride,numjobs,circuit,time\n'
+        f = open('results.csv', 'a')
+        f.write(colnames)
+        f.close()
+            
     f = open('results.csv', 'a')
-    f.write('{},{},{},{},{},{},{},{}\n'.format(str(tuple(args.img_shape)), args.qubits, args.filters, args.kernel_size, args.stride, args.num_jobs, args.circuit, t))
+    f.write('{},{},{},{},{},{},{},{}\n'.format(args.img_shape[0], args.qubits, args.filters, args.kernel_size, args.stride, args.num_jobs, args.circuit, t))
+    f.close()
