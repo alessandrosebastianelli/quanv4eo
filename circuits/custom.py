@@ -49,15 +49,19 @@ def rxyz_custom(phi, qubits, kernel_size, filters, n_layers, seed):
         #for j in range(kernel_size**2):
             #qml.RY(np.pi * phi[j], wires=j)
         #    qml.RX(np.pi * phi[j], wires=j)
-            
-        for k in range(1, kernel_size**2):
-            #for k2 in range(0, qubits):
-            #    if k < k2:
-            qml.CNOT(wires=[k, 0])
-                    
-        for j in range(kernel_size**2):
-            #qml.RY(np.pi * phi[j], wires=j)
+        
+        for j in range(qubits):
             qml.RY(np.pi * phi[j], wires=j)
+#            qml.RZ(np.pi * phi[j], wires=j)
+            #qml.RX(np.pi * phi[j], wires=j)
+                    
+        for k in range(1, kernel_size**2):
+            for k2 in range(0, qubits):
+                if k < k2:
+                    qml.CNOT(wires=[k, k2])
+
+        RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
+        
         
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
