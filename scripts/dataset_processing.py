@@ -30,17 +30,25 @@ with warnings.catch_warnings():
 #=====================================================================
 dataset_name = 'EuroSAT'
 QUBITS      = 16
-KERNEL_SIZE = 3
+KERNEL_SIZE = 4
 FILTERS     = 12
 N_LAYERS    = 2
-STRIDE      = 2
+STRIDE      = 4
 NUM_JOBS    = 16
 SEED        = 1
-MODE        = 'CNN' # 'CNN' or 'QCNN'
+MODE        = 'QCNN' # 'CNN' or 'QCNN'
 CIRCUIT     = 'rxyz' # 'rxyz' or 'rx' or 'ry' or 'rz'
-NCONV       = 3
-
+NCONV       = 2
+SHAPE       = (64,64,3)
 new_name = dataset_name+'_processed_'+MODE
+
+os1 = SHAPE[0]
+print('Initial Shape == ', os1)
+for n in range(NCONV):
+    os1 = (os1 - KERNEL_SIZE)/STRIDE+1
+    print('Shape at layer {} == {}'.format(n+1, os1))
+print()
+
 
 #=====================================================================    
 #---------------------------- LOAD DATASET ---------------------------
@@ -71,7 +79,7 @@ if MODE == 'CNN':
         kernel_size = KERNEL_SIZE,
         strides     = STRIDE,
         activation  = None,
-        input_shape = (70,70,3)
+        input_shape = SHAPE
     )
     l.trainable = False
     cnn.add(l)
@@ -94,7 +102,7 @@ for n in range(NCONV):
         os.makedirs(os.path.join(root2, path), exist_ok=True)
 
 # Apply Quantum or Classical Convolution to the dataset
-gen = iter(datareader.generatorv2((x, y), (70,70,3)))
+gen = iter(datareader.generatorv2((x, y), SHAPE))
 for i in tqdm(range(len(x)), colour='black'):
     (xi, yi, pt) = next(gen)
     for n in range(NCONV):
