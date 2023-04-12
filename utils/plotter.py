@@ -99,18 +99,24 @@ def plot_training(name, display = True, latest=False):
     size = np.log(1+len(df[df.columns[0]])) #Used to adjust the size of the plot
     # Plot history
 
-    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(5*size, len(results)*3*size))
+    fig, ax = plt.subplots(nrows=2, ncols=nc//2, figsize=(5*size, 2*size))
     # For each snapshop
     for result in results:
         # Read the resu;ts
-        df = pd.read_csv(os.path.join(result, 'history.csv')) 
+        df = pd.read_csv(os.path.join(result, 'history.csv'))
+        m = 0
+
+        ax = ax.flatten()
         # Plot each metric in the results (loss, val loss, accuracy, val accuracy, etc.)
         for n in range(nc):
             df[df.columns[n]].plot(ax=ax[n], style='.-', label = result.split(os.sep)[-2])
             ax[n].set_title(df.columns[n])
-            ax[n].legend()
+            ax[n].legend(fontsize=6, loc='upper right')
             ax[n].set_xlabel('Epochs')
-            ax[n].set_xticks(np.arange(len(df[df.columns[n]]))) 
+
+            nm = len(df[df.columns[n]])
+            if nm >= m: m = nm 
+            #ax[n].set_xticks(np.arange(m)) 
 
     fig.tight_layout()
     if display: plt.show()
