@@ -72,7 +72,7 @@ def plot_features_map(feat_maps):
     plt.show()
     plt.close()
 
-def plot_training(name, display = True, latest=False):
+def plot_training(name, display = True, latest=False, verbose=0):
     '''
         This function plots the training and validation curves of a specific model, merging
         all the simulations done with that model, unless latest is set to True.
@@ -122,6 +122,6 @@ def plot_training(name, display = True, latest=False):
     if display: plt.show()
 
     fig.savefig(os.path.join('results', name, 'training.png'))
-    print('Image saved')
+    if verbose > 0: print('Image saved')
 
     plt.close()
