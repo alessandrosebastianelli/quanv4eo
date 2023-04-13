@@ -223,7 +223,7 @@ class QCNNv1:
         paths       = []
 
         # Iterate through the dataset (can be training or validation)
-        for i in tqdm(range(len(dataset[0])), verbose):
+        for i in tqdm(range(len(dataset[0])), disable=not(verbose)):
             x, y, ps = next(iterator)
             p = self.model.predict(x[np.newaxis,...], verbose = 0)
             predictions[i] = p[0]
