@@ -69,4 +69,4 @@ for lr in tqdm(learning_rate):
                 qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = 0)
                 
                 # Plot training curvers
-                plotter.plot_training('QCNNv1', display = True)
+                plot_training('QCNNv1', display = False, verbose=verbose)
