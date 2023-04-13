@@ -141,18 +141,18 @@ class QCNNv1:
         # Save model
         model_path = os.path.join(path, 'model.h5')
         self.model.save(model_path)
-        print('{:<30s}{}'.format('Model Saved', model_path))
+        if verbose > 0: print('{:<30s}{}'.format('Model Saved', model_path))
         # Save history
         history_path = os.path.join(path,'history.csv')
         df = pd.DataFrame(history.history)
         df.to_csv(history_path, index=False)
-        print('{:<30s}{}'.format('History Saved', history_path))
+        if verbose > 0: print('{:<30s}{}'.format('History Saved', history_path))
         # Save model settings
-        self.__save_model_settings(path) 
+        self.__save_model_settings(path, verbose) 
         # Test model
-        self.test(train_dataset, val_dataset, path, labels_mapper, normalize)
+        self.test(train_dataset, val_dataset, path, labels_mapper, normalize, verbose)
     
-    def __save_model_settings(self, path):
+    def __save_model_settings(self, path, verbose):
         '''
             Saves Model settings and summary to a file.
 
@@ -176,9 +176,9 @@ class QCNNv1:
             f.write('{:.^100}\n'.format('Model Parameters'))
             f.write(summary)
 
-        print('{:<30s}{}'.format('Model Settings Saved',settings_path))
+        if verbose > 0: print('{:<30s}{}'.format('Model Settings Saved',settings_path))
     
-    def test(self, train_dataset, val_dataset, path, labels_mapper, normalize=None):
+    def test(self, train_dataset, val_dataset, path, labels_mapper, normalize=None, verbose=0):
         '''
             Test the model and save results.
 
@@ -200,12 +200,12 @@ class QCNNv1:
                                          normalize=normalize))
 
         # Training Results
-        print('Testing model on training set')
-        self.__make_pred(train_dataset, train_gen, path, 'training', labels_mapper)
-        print('Testing model on valdiation set')
-        self.__make_pred(val_dataset,   val_gen,   path, 'validation', labels_mapper)
+        if verbose > 0: print('Testing model on training set')
+        self.__make_pred(train_dataset, train_gen, path, 'training', labels_mapper, verbose)
+        if verbose > 0: print('Testing model on valdiation set')
+        self.__make_pred(val_dataset,   val_gen,   path, 'validation', labels_mapper, verbose)
 
-    def __make_pred(self, dataset, iterator, path, name, labels_mapper):
+    def __make_pred(self, dataset, iterator, path, name, labels_mapper, verbose):
         '''
             Make model prediction over a dataset and save results
 
@@ -223,7 +223,7 @@ class QCNNv1:
         paths       = []
 
         # Iterate through the dataset (can be training or validation)
-        for i in tqdm(range(len(dataset[0]))):
+        for i in tqdm(range(len(dataset[0])), verbose):
             x, y, ps = next(iterator)
             p = self.model.predict(x[np.newaxis,...], verbose = 0)
             predictions[i] = p[0]
@@ -236,10 +236,10 @@ class QCNNv1:
                            'Targets':     np.argmax(targets, axis=-1),
                            'Paths':       paths})
         df.to_csv(training_res, index=False)
-        print('{:<30s}{}'.format(name +' Results', training_res)) 
-        self.__confusion_matrix_report(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values())
+        if verbose > 0:  print('{:<30s}{}'.format(name +' Results', training_res)) 
+        self.__confusion_matrix_report(path, name, np.argmax(targets, axis=-1), np.argmax(predictions, axis=-1), labels_mapper.values(), verbose)
 
-    def __confusion_matrix_report(self, path, name, targets, predictions, classes, display = False):
+    def __confusion_matrix_report(self, path, name, targets, predictions, classes, display = False, verbose=0):
         '''
             Plot the confusion matrix and compute the classification report.
 
@@ -264,7 +264,7 @@ class QCNNv1:
 
         cf_path = os.path.join(path, name+'-cf.png')
         fig.savefig(cf_path)
-        print('{:<30s}{}'.format('Confusion matrix saved', cf_path))
+        if verbose > 0: print('{:<30s}{}'.format('Confusion matrix saved', cf_path))
         plt.close()
         
         # Calculate the Classification Report
@@ -274,4 +274,4 @@ class QCNNv1:
         with open(report_path, 'w') as f:
             f.write(c_report)
             
-        print('{:<30s}{}'.format('Classification report saved', report_path))
+        if verbose > 0: print('{:<30s}{}'.format('Classification report saved', report_path))
