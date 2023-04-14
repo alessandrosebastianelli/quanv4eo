@@ -29,18 +29,18 @@ with warnings.catch_warnings():
 #-------------------------- USER PARAMETERS --------------------------
 #=====================================================================
 dataset_name = 'EuroSAT'
-QUBITS      = 16
-KERNEL_SIZE = 4
-FILTERS     = 12
-N_LAYERS    = 2
-STRIDE      = 4
+QUBITS      = 9
+KERNEL_SIZE = 3
+FILTERS     = 9
+N_LAYERS    = 1
+STRIDE      = 1
 NUM_JOBS    = 16
 SEED        = 1
 MODE        = 'QCNN' # 'CNN' or 'QCNN'
-CIRCUIT     = 'rxyz' # 'rxyz' or 'rx' or 'ry' or 'rz'
-NCONV       = 2
+CIRCUIT     = 'ry' # 'rxyz' or 'rx' or 'ry' or 'rz'
+NCONV       = 1
 SHAPE       = (64,64,3)
-new_name = dataset_name+'_processed_'+MODE
+new_name = dataset_name+'_processed_v2_'+MODE
 
 os1 = SHAPE[0]
 print('Initial Shape == ', os1)
