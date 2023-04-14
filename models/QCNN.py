@@ -53,9 +53,9 @@ class QCNNv1:
         self.pool_size     = qcnnv1s['pool_size']
         self.pool_stride   = qcnnv1s['pool_stride']
 
-        self.model = self.__build() 
+        self.model = self.build() 
 
-    def __build(self):
+    def build(self):
         '''
             This method builds the QCNN.
         '''
