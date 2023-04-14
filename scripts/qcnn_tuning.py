@@ -41,7 +41,7 @@ dense           = [[32,16], [64,32,16], [128,64,32,16]]
 conv            = [None, None, None, [32,64],[32,64,128]]
 
 # Loading the dataset
-dataset_name = 'EuroSAT_processed_QCNN_0'
+dataset_name = 'EuroSAT_processed_v2_QCNN_0'
 root = os.path.join('/Users/asebastianelli/Desktop/quanvolutional4eo/datasets', dataset_name)
 dhandler = datahandler(root)
 train_set, val_set = dhandler.split(None, factor=0.2)
@@ -66,7 +66,7 @@ for lr in tqdm(learning_rate):
                 qcnn.early_stopping = 10
                 
                 # Train and test the model
-                qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = 0)
+                qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = 1)
                 
                 # Plot training curvers
-                plot_training('QCNNv1', display = False, verbose=verbose)
+                plot_training('QCNNv1', display = False, verbose=1)
