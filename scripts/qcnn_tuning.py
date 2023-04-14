@@ -1,17 +1,30 @@
 import sys
 sys.path += ['./', '../']
 
-from utils.converter import convert_labels_mapper
-from data.datahandler import datahandler
-from data.datareader import datareader
-from utils import test_loader
-from utils.plotter import *
-from models.QCNN import *
-
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 import numpy as np
 import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+import tensorflow as tf
+import logging
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+tf.get_logger().setLevel('ERROR')
+logging.getLogger('tensorflow').setLevel(logging.FATAL)
+
+
+from utils.converter import convert_labels_mapper
+from data.datahandler import datahandler
+from data.datareader import datareader
+from utils.plotter import *
+from models.QCNN import *
+
+
+
+
 
 #------------------------------------------------------------------------------------------------------------
 #                                          HYPERPARAMETERS TUNING
@@ -42,13 +55,15 @@ conv            = [None, None, None, [32,64],[32,64,128]]
 
 # Loading the dataset
 dataset_name = 'EuroSAT_processed_v2_QCNN_0'
-root = os.path.join('/Users/asebastianelli/Desktop/quanvolutional4eo/datasets', dataset_name)
+root = os.path.join('../datasets', dataset_name)
 dhandler = datahandler(root)
 train_set, val_set = dhandler.split(None, factor=0.2)
 labels_mapper, x_t, y_t = dhandler.unpack(train_set)
 labels_mapper, x_v, y_v = dhandler.unpack(val_set)
 shape = np.load(x_t[0]).shape
 classes = dhandler.paths.keys()
+
+VERBOSE = 0
 
 # Start the hyperparameters tuning
 for lr in tqdm(learning_rate):
@@ -64,9 +79,13 @@ for lr in tqdm(learning_rate):
                 qcnn.conv           = c
                 qcnn.epochs         = 200
                 qcnn.early_stopping = 10
+
+                qcnn.model = qcnn.build()
+
+                if VERBOSE: print(qcnn.model.summary())
                 
                 # Train and test the model
-                qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = 1)
+                qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = VERBOSE)
                 
                 # Plot training curvers
-                plot_training('QCNNv1', display = False, verbose=1)
+                plot_training('QCNNv1', display = False, verbose=VERBOSE)
