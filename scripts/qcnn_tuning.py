@@ -15,16 +15,18 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 tf.get_logger().setLevel('ERROR')
 logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
+# Suppress warnings
+import warnings
+def fxn(): warnings.warn("deprecated", DeprecationWarning)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    fxn()
 
 from utils.converter import convert_labels_mapper
 from data.datahandler import datahandler
 from data.datareader import datareader
 from utils.plotter import *
 from models.QCNN import *
-
-
-
-
 
 #------------------------------------------------------------------------------------------------------------
 #                                          HYPERPARAMETERS TUNING
@@ -48,14 +50,14 @@ from models.QCNN import *
 #        }
 
 # In this case we are tuning the model using the following hyperparameters lists
-learning_rate   = [0.02, 0.002, 0.0002]
-batch_size      = [16, 64, 128]
+learning_rate   = [0.0002]
+batch_size      = [16]
 dense           = [[32,16], [64,32,16], [128,64,32,16]]
-conv            = [None, None, None, [32,64],[32,64,128]]
+conv            = [[32,64],[32,64,128]]
 
 # Loading the dataset
 dataset_name = 'EuroSAT_processed_v2_QCNN_0'
-root = os.path.join('../datasets', dataset_name)
+root = os.path.join('/Users/asebastianelli/Desktop/quanvolutional4eo/datasets', dataset_name)
 dhandler = datahandler(root)
 train_set, val_set = dhandler.split(None, factor=0.2)
 labels_mapper, x_t, y_t = dhandler.unpack(train_set)
