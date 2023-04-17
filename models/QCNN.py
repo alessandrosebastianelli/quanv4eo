@@ -167,8 +167,19 @@ class QCNNv1:
             f.write('{:<30s}:{}\n'.format('Image Shape',             self.img_shape))
 
             # Write Config file to settings.txt
-            for key, value in qcnnv1s.items():
-                f.write('{:<30s}:{}\n'.format(key, value))          
+            f.write('{:<30s}:{}\n'.format('loss', self.loss))
+            f.write('{:<30s}:{}\n'.format('learning_rate', self.learning_rate))
+            f.write('{:<30s}:{}\n'.format('metrics', self.metrics))
+            f.write('{:<30s}:{}\n'.format('dropout', self.dropout))
+            f.write('{:<30s}:{}\n'.format('batch_size', self.batch_size))
+            f.write('{:<30s}:{}\n'.format('epochs', self.epochs))
+            f.write('{:<30s}:{}\n'.format('early_stopping', self.es_rounds))
+            f.write('{:<30s}:{}\n'.format('dense', self.dense))
+            f.write('{:<30s}:{}\n'.format('conv', self.conv))
+            f.write('{:<30s}:{}\n'.format('kernel', self.kernel))
+            f.write('{:<30s}:{}\n'.format('stride', self.stride))
+            f.write('{:<30s}:{}\n'.format('pool_size', self.pool_size))
+            f.write('{:<30s}:{}\n'.format('pool_stride', self.pool_stride))          
 
             tmp_smry = StringIO()
             self.model.summary(print_fn=lambda x: tmp_smry.write(x + '\n'))
