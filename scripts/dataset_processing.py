@@ -33,14 +33,14 @@ QUBITS      = 9
 KERNEL_SIZE = 3
 FILTERS     = 9
 N_LAYERS    = 1
-STRIDE      = 1
+STRIDE      = 2
 NUM_JOBS    = 16
 SEED        = 1
 MODE        = 'QCNN' # 'CNN' or 'QCNN'
 CIRCUIT     = 'ry' # 'rxyz' or 'rx' or 'ry' or 'rz'
 NCONV       = 1
 SHAPE       = (64,64,3)
-new_name = dataset_name+'_processed_v2_'+MODE
+new_name = '{}_K_{}_S{}_{}'.format(dataset_name,KERNEL_SIZE,STRIDE,MODE)
 
 os1 = SHAPE[0]
 print('Initial Shape == ', os1)
