@@ -62,23 +62,24 @@ class QCNNv1:
 
         xin = Input(shape=self.img_shape)
         x   = Activation('relu')(xin)
-        x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
+        if not((self.pool_size == 1) and (self.pool_stride ==1)):
+            x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
         
         if self.conv is not None:
             # Convolutional Layers
             for conv in self.conv:
                 x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu')(x)
-                x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
-        
+                if not((self.pool_size == 1) and (self.pool_stride ==1)):
+                    x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
         x   = Flatten()(x)
-        
-        # Dense Layers
-        for dense in self.dense:
-            x   = Dropout(self.dropout)(x)
-            x   = Dense(dense, activation='relu')(x)
+        if self.dense is not None:
+            # Dense Layers
+            for dense in self.dense:
+                x   = Dropout(self.dropout)(x)
+                x   = Dense(dense, activation='relu')(x)
 
         # Final Dense Layer
-        x   = Dropout(self.dropout)(x) 
+        x   = Dropout(self.dropout)(x)
         x   = Dense(self.n_classes, activation='softmax')(x)
         
         model = Model(inputs=xin, outputs=x, name=self.name)
