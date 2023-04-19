@@ -50,10 +50,21 @@ from models.QCNN import *
 #        }
 
 # In this case we are tuning the model using the following hyperparameters lists
-learning_rate   = [0.0002]
-batch_size      = [16]
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# Be aware that exploring 3 different hyperparameters takes a large amount of time.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+learning_rate   = [0.002]
+batch_size      = [64]
 dense           = [[32,16], [64,32,16], [128,64,32,16]]
 conv            = [[32,64],[32,64,128]]
+dropout         = [0.1,0.2, 0.5, 0.8]
+kernel          = [3]
+stride          = [1]
+pool_size       = [2]
+pool_stride     = [2]
 
 # Loading the dataset
 dataset_name = 'EuroSAT_processed_v2_QCNN_0'
@@ -66,28 +77,37 @@ shape = np.load(x_t[0]).shape
 classes = dhandler.paths.keys()
 
 VERBOSE = 0
-
 # Start the hyperparameters tuning
-for lr in tqdm(learning_rate):
-    for bs in tqdm(batch_size, leave=False):
-        for d in tqdm(dense, leave=False):
-            for c in tqdm(conv, leave=False):
-                qcnn = QCNNv1(img_shape = shape, n_classes = 10)
+for lr in tqdm(learning_rate, desc = '{:<30s}'.format('Learning Rate')):
+    for bs in tqdm(batch_size, leave=False, desc = '{:<30s}'.format('Batch Size')):
+        for d in tqdm(dense, leave=False,   desc = '{:<30s}'.format('Dense Layers')):
+            for c in tqdm(conv, leave=False, desc = '{:<30s}'.format('Conv Layers')):
+                for do in tqdm(dropout, leave=False, desc = '{:<30s}'.format('Dropout')):
+                    for k in tqdm(kernel, leave=False, desc = '{:<30s}'.format('Kernel Size')):
+                        for s in tqdm(stride, leave=False, desc = '{:<30s}'.format('Stride')):
+                            for pk in tqdm(pool_size, leave=False, desc = '{:<30s}'.format('Pool Size')):
+                                for ps in tqdm(pool_stride, leave=False, desc = '{:<30s}'.format('Pool Stide')):
+                                    qcnn = QCNNv1(img_shape = shape, n_classes = 10)
                 
-                # Forcing current hyperparameters
-                qcnn.learning_rate  = lr
-                qcnn.batch_size     = bs
-                qcnn.dense          = d
-                qcnn.conv           = c
-                qcnn.epochs         = 200
-                qcnn.early_stopping = 10
+                                    # Forcing current hyperparameters
+                                    qcnn.learning_rate  = lr
+                                    qcnn.batch_size     = bs
+                                    qcnn.dense          = d
+                                    qcnn.conv           = c
+                                    qcnn.epochs         = 200
+                                    qcnn.early_stopping = 5
+                                    qcnn.dropout        = do
+                                    qcnn.kernel         = k
+                                    qcnn.stride         = s
+                                    qcnn.pool_size      = pk
+                                    qcnn.pool_stride    = ps
 
-                qcnn.model = qcnn.build()
+                                    qcnn.model = qcnn.build()
 
-                if VERBOSE: print(qcnn.model.summary())
-                
-                # Train and test the model
-                qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = VERBOSE)
-                
-                # Plot training curvers
-                plot_training('QCNNv1', display = False, verbose=VERBOSE)
+                                    if VERBOSE: print(qcnn.model.summary())
+                                    
+                                    # Train and test the model
+                                    qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = VERBOSE)
+                                    
+                                    # Plot training curvers
+                                    plot_training('QCNNv1', display = False, verbose=VERBOSE)
