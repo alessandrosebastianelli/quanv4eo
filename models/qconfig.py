@@ -8,6 +8,7 @@ qcnnv1s = {
             'early_stopping':  30,
             'dense':           [32, 16],    # Vector of #neurons for each dense layer
             'conv':            None,     # Vector of #filters for each convolution layer
+            'padding':         'same',
             'kernel':          3,           # Kernel Size for the convolution
             'stride':          1,           # Strides for the convolution
             'pool_size':       2,           # Kernel Size for the Global Average Pooling
