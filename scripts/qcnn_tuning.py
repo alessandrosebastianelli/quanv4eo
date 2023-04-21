@@ -1,9 +1,10 @@
 import sys
 sys.path += ['./', '../']
-
+from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 import numpy as np
+import keras_tuner
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -11,7 +12,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import logging
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
 tf.get_logger().setLevel('ERROR')
 logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
@@ -28,44 +28,6 @@ from data.datareader import datareader
 from utils.plotter import *
 from models.QCNN import *
 
-#------------------------------------------------------------------------------------------------------------
-#                                          HYPERPARAMETERS TUNING
-#-------------------------------------------------------------------------------------------------------------
-# Hyperparameters to be tuned, the following is the base parameter dictionay.
-#
-# cnnv1s = {
-#            'loss':            'categorical_crossentropy',
-#            'learning_rate':   0.0002,
-#            'metrics':         ['accuracy'],
-#            'dropout':         0.2,
-#            'batch_size':      16,
-#            'epochs':          100,
-#            'early_stopping':  30,
-#            'dense':           [256, 128, 64, 32, 16],    # Vector of #neurons for each dense layer
-#            'conv':            [12, 64, 128, 256],        # Vector of #filters for each convolution layer
-#            'kernel':          3,                         # Kernel Size for the convolution
-#            'stride':          1,                         # Strides for the convolution
-#            'pool_size':       2,                         # Kernel Size for the Global Average Pooling
-#            'pool_stride':     1,                         # Strides for the Global Average Pooling
-#        }
-
-# In this case we are tuning the model using the following hyperparameters lists
-#
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
-# Be aware that exploring 3 different hyperparameters takes a large amount of time.
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-learning_rate   = [0.002]
-batch_size      = [64]
-dense           = [[32,16], [64,32,16], [128,64,32,16]]
-conv            = [[32,64],[32,64,128]]
-dropout         = [0.1,0.2, 0.5, 0.8]
-kernel          = [3]
-stride          = [1]
-pool_size       = [2]
-pool_stride     = [2]
-
 # Loading the dataset
 dataset_name = 'EuroSAT_processed_v2_QCNN_0'
 root = os.path.join('/Users/asebastianelli/Desktop/quanvolutional4eo/datasets', dataset_name)
@@ -76,38 +38,65 @@ labels_mapper, x_v, y_v = dhandler.unpack(val_set)
 shape = np.load(x_t[0]).shape
 classes = dhandler.paths.keys()
 
-VERBOSE = 0
-# Start the hyperparameters tuning
-for lr in tqdm(learning_rate, desc = '{:<30s}'.format('Learning Rate')):
-    for bs in tqdm(batch_size, leave=False, desc = '{:<30s}'.format('Batch Size')):
-        for d in tqdm(dense, leave=False,   desc = '{:<30s}'.format('Dense Layers')):
-            for c in tqdm(conv, leave=False, desc = '{:<30s}'.format('Conv Layers')):
-                for do in tqdm(dropout, leave=False, desc = '{:<30s}'.format('Dropout')):
-                    for k in tqdm(kernel, leave=False, desc = '{:<30s}'.format('Kernel Size')):
-                        for s in tqdm(stride, leave=False, desc = '{:<30s}'.format('Stride')):
-                            for pk in tqdm(pool_size, leave=False, desc = '{:<30s}'.format('Pool Size')):
-                                for ps in tqdm(pool_stride, leave=False, desc = '{:<30s}'.format('Pool Stide')):
-                                    qcnn = QCNNv1(img_shape = shape, n_classes = 10)
+# Training and Validation data loader
+x_train, y_train, = datareader.generatorv3([x_t, y_t], shape, normalize=False)
+x_val, y_val   = datareader.generatorv3([x_v, y_v], shape, normalize=False)
+
+print(x_train.shape, y_train.shape)
+print(x_val.shape, y_val.shape)
+
+# Early Stopping to avoid overfitting
+es = EarlyStopping(monitor='val_loss', patience=5, mode='auto', verbose=0, baseline=None)
+
+def build_model(hp):
+    learning_rate  = hp.Float('learning_rate', min_value = 0.0002, max_value = 0.2, sampling='log')
+    #batch_size     = hp.Choice('batch_size', [64,16])
+
+    dense1         = hp.Int('dense1', min_value=64, max_value=128, step = -32) #[[32,16], [64,32,16], [128,64,32,16]])
+    dense2         = hp.Int('dense2', min_value=32, max_value=64, step = -32) #[[32,16], [64,32,16], [128,64,32,16]]) 
+    dense3         = hp.Int('dense3', min_value=16, max_value=64, step = -8) #[[32,16], [64,32,16], [128,64,32,16]])
+    
+    conv1          = hp.Int('conv1', min_value=16, max_value=32, step = 16) #[[32,16], [64,32,16], [128,64,32,16]])
+    conv2          = hp.Int('conv2', min_value=32, max_value=64, step = 16) #[[32,16], [64,32,16], [128,64,32,16]]) 
+    conv3          = hp.Int('conv3', min_value=64, max_value=128, step = 16) #[[32,16], [64,32,16], [128,64,32,16]])
+
+    dropout        = hp.Float('dropout', min_value = 0.1, max_value = 0.5, sampling='log')
+    kernel         = hp.Choice('kernel',[3,4,5])
+    stride         = hp.Choice('stride',[1,2])
+    pool_size      = hp.Choice('pool_size',[1,2])
+    pool_stride    = hp.Choice('pool_stride',[1,2])
+    padding        = hp.Choice('padding',['valid','same'])
+
+    qcnn = QCNNv1(img_shape = shape, n_classes = 10)
                 
-                                    # Forcing current hyperparameters
-                                    qcnn.learning_rate  = lr
-                                    qcnn.batch_size     = bs
-                                    qcnn.dense          = d
-                                    qcnn.conv           = c
-                                    qcnn.epochs         = 200
-                                    qcnn.early_stopping = 5
-                                    qcnn.dropout        = do
-                                    qcnn.kernel         = k
-                                    qcnn.stride         = s
-                                    qcnn.pool_size      = pk
-                                    qcnn.pool_stride    = ps
+    # Forcing current hyperparameters
+    qcnn.learning_rate  = learning_rate
+    #qcnn.batch_size     = batch_size
+    qcnn.dense          = [dense1, dense2, dense3]
+    qcnn.conv           = [conv1, conv2, conv3]
+    qcnn.epochs         = 200
+    qcnn.early_stopping = 5
+    qcnn.dropout        = dropout
+    qcnn.kernel         = kernel
+    qcnn.stride         = stride
+    qcnn.pool_size      = pool_size
+    qcnn.pool_stride    = pool_stride
+    qcnn.padding        = padding
 
-                                    qcnn.model = qcnn.build()
+    qcnn.model = qcnn.build()
 
-                                    if VERBOSE: print(qcnn.model.summary())
-                                    
-                                    # Train and test the model
-                                    qcnn.train_test([x_t, y_t], [x_v, y_v], convert_labels_mapper(labels_mapper), normalize = None, verbose = VERBOSE)
-                                    
-                                    # Plot training curvers
-                                    plot_training('QCNNv1', display = False, verbose=VERBOSE)
+    return qcnn.model
+
+tuner = keras_tuner.RandomSearch(
+    hypermodel=build_model,
+    objective="val_accuracy",
+    max_trials=10,
+    executions_per_trial=2,
+    overwrite=False,
+    directory=os.path.join('results', 'dltuning'),
+    project_name="QCNN-Tuning",
+)
+
+print(tuner.search_space_summary())
+
+tuner.search(x_train, y_train, epochs=200, validation_data=(x_val, y_val), callbacks=[es], batch_size=64, shuffle=True)
