@@ -49,6 +49,7 @@ class QCNNv1:
         self.dense         = qcnnv1s['dense']
         self.conv          = qcnnv1s['conv']
         self.kernel        = qcnnv1s['kernel']
+        self.padding       = qcnnv1s['padding']
         self.stride        = qcnnv1s['stride']
         self.pool_size     = qcnnv1s['pool_size']
         self.pool_stride   = qcnnv1s['pool_stride']
@@ -68,7 +69,7 @@ class QCNNv1:
         if self.conv is not None:
             # Convolutional Layers
             for conv in self.conv:
-                x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu')(x)
+                x   = Conv2D(filters = conv, kernel_size = self.kernel, strides = self.stride, activation='relu', padding=self.padding)(x)
                 if not((self.pool_size == 1) and (self.pool_stride ==1)):
                     x   = AveragePooling2D(pool_size = self.pool_size, strides = self.pool_stride)(x)
         x   = Flatten()(x)
