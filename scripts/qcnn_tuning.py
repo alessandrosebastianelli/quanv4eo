@@ -30,7 +30,7 @@ from models.QCNN import *
 
 # Loading the dataset
 dataset_name = 'EuroSAT_processed_v2_QCNN_0'
-root = os.path.join('/Users/asebastianelli/Desktop/quanvolutional4eo/datasets', dataset_name)
+root = os.path.join('../datasets', dataset_name)
 dhandler = datahandler(root)
 train_set, val_set = dhandler.split(None, factor=0.2)
 labels_mapper, x_t, y_t = dhandler.unpack(train_set)
@@ -53,10 +53,10 @@ def build_model(hp):
     #batch_size     = hp.Choice('batch_size', [64,16])
 
     dense1         = hp.Int('dense1', min_value=64, max_value=128, step = -32) #[[32,16], [64,32,16], [128,64,32,16]])
-    dense2         = hp.Int('dense2', min_value=32, max_value=64, step = -32) #[[32,16], [64,32,16], [128,64,32,16]]) 
+    dense2         = hp.Int('dense2', min_value=32, max_value=64, step = -16) #[[32,16], [64,32,16], [128,64,32,16]]) 
     dense3         = hp.Int('dense3', min_value=16, max_value=64, step = -8) #[[32,16], [64,32,16], [128,64,32,16]])
     
-    conv1          = hp.Int('conv1', min_value=16, max_value=32, step = 16) #[[32,16], [64,32,16], [128,64,32,16]])
+    conv1          = hp.Int('conv1', min_value=8, max_value=32, step = 16) #[[32,16], [64,32,16], [128,64,32,16]])
     conv2          = hp.Int('conv2', min_value=32, max_value=64, step = 16) #[[32,16], [64,32,16], [128,64,32,16]]) 
     conv3          = hp.Int('conv3', min_value=64, max_value=128, step = 16) #[[32,16], [64,32,16], [128,64,32,16]])
 
@@ -75,7 +75,7 @@ def build_model(hp):
     qcnn.dense          = [dense1, dense2, dense3]
     qcnn.conv           = [conv1, conv2, conv3]
     qcnn.epochs         = 200
-    qcnn.early_stopping = 5
+    qcnn.es_rounds      = 5
     qcnn.dropout        = dropout
     qcnn.kernel         = kernel
     qcnn.stride         = stride
@@ -90,8 +90,8 @@ def build_model(hp):
 tuner = keras_tuner.RandomSearch(
     hypermodel=build_model,
     objective="val_accuracy",
-    max_trials=10,
-    executions_per_trial=2,
+    max_trials=50,
+    executions_per_trial=1,
     overwrite=False,
     directory=os.path.join('results', 'dltuning'),
     project_name="QCNN-Tuning",
