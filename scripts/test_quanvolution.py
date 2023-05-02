@@ -56,12 +56,13 @@ if __name__ == '__main__':
     
     t = quanvolution(tuple(args.img_shape), args.qubits, args.filters, args.kernel_size, args.stride, args.num_jobs, args.circuit)
     
-    if not os.path.isfile('results.csv'):
+    res_path = os.path.join('results, timing_results.csv')
+    if not os.path.isfile(res_path):
         colnames = 'imgsize,qubits,filters,kernelsize,stride,numjobs,circuit,time\n'
-        f = open('results.csv', 'a')
+        f = open(res_path, 'a')
         f.write(colnames)
         f.close()
             
-    f = open('results.csv', 'a')
+    f = open(res_path, 'a')
     f.write('{},{},{},{},{},{},{},{}\n'.format(args.img_shape[0], args.qubits, args.filters, args.kernel_size, args.stride, args.num_jobs, args.circuit, t))
     f.close()
