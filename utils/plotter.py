@@ -1,9 +1,14 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import matplotlib
 import glob
 import os
 
+font = {'weight' : 'bold',
+        'size'   : 13}
+
+matplotlib.rc('font', **font)
 
 def plot_result(img, out):
     '''
@@ -31,8 +36,8 @@ def plot_result(img, out):
     # Iterates through all the features map
     for i in range(out.shape[-1]):
         # Plot the i-th feature map
-        axes[0,i+1].imshow(out[...,i], vmin = -1, vmax = 1)
-        axes[0,i+1].set_title('QCNN - F. Map {}'.format(i))
+        axes[0,i+1].imshow(out[...,i], vmin = -1, vmax = 1, cmap = 'magma')
+        axes[0,i+1].set_title('Feature Map {}'.format(i+1))
         axes[0,i+1].axis('off')
         # Plot the histogram of the i-th feature map
         axes[1,i+1].hist(out[...,i].flatten(), 60, color='black')
@@ -57,7 +62,7 @@ def plot_features_map(feat_maps):
     for i in range(feat_maps.shape[-1]):
         # Plot the i-th feature map
         axes[0,i].imshow(feat_maps[...,i], vmin = -1, vmax = 1)
-        axes[0,i].set_title('QCNN - F. Map {}'.format(i))
+        axes[0,i].set_title('Feature Map {}'.format(i+1))
         axes[0,i].axis('off')
         # Plot the histogram of the i-th feature map
         axes[1,i].hist(feat_maps[...,i].flatten(), 60, color='black')
@@ -67,7 +72,7 @@ def plot_features_map(feat_maps):
     plt.show()
     plt.close()
 
-def plot_training(name, display = True, latest=False):
+def plot_training(name, display = True, latest=False, verbose=0):
     '''
         This function plots the training and validation curves of a specific model, merging
         all the simulations done with that model, unless latest is set to True.
@@ -94,23 +99,29 @@ def plot_training(name, display = True, latest=False):
     size = np.log(1+len(df[df.columns[0]])) #Used to adjust the size of the plot
     # Plot history
 
-    fig, ax = plt.subplots(nrows=nc, ncols=1, figsize=(5*size, len(results)*3*size))
+    fig, ax = plt.subplots(nrows=2, ncols=nc//2, figsize=(5*size, 2*size))
     # For each snapshop
     for result in results:
         # Read the resu;ts
-        df = pd.read_csv(os.path.join(result, 'history.csv')) 
+        df = pd.read_csv(os.path.join(result, 'history.csv'))
+        m = 0
+
+        ax = ax.flatten()
         # Plot each metric in the results (loss, val loss, accuracy, val accuracy, etc.)
         for n in range(nc):
             df[df.columns[n]].plot(ax=ax[n], style='.-', label = result.split(os.sep)[-2])
             ax[n].set_title(df.columns[n])
-            ax[n].legend()
+            ax[n].legend(fontsize=6, loc='upper right')
             ax[n].set_xlabel('Epochs')
-            ax[n].set_xticks(np.arange(len(df[df.columns[n]]))) 
+
+            nm = len(df[df.columns[n]])
+            if nm >= m: m = nm 
+            #ax[n].set_xticks(np.arange(m)) 
 
     fig.tight_layout()
     if display: plt.show()
 
     fig.savefig(os.path.join('results', name, 'training.png'))
-    print('Image saved')
+    if verbose > 0: print('Image saved')
 
     plt.close()

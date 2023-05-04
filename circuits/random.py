@@ -2,8 +2,16 @@ from pennylane.templates import RandomLayers
 import pennylane as qml
 import numpy as np
 
+##### Jax & Pennylane
+# https://pennylane.ai/qml/demos/tutorial_jax_transformations.html
+#####
+import jax
+import jax.numpy as jnp
+from functools import partial
 
-def ry_random(qubits, kernel_size, filters, n_layers, seed=1):
+#@jax.jit
+@partial(jax.jit, static_argnames=['qubits', 'kernel_size', 'filters', 'n_layers', 'seed'])
+def ry_random(phi, qubits, kernel_size, filters, n_layers, seed):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -25,23 +33,30 @@ def ry_random(qubits, kernel_size, filters, n_layers, seed=1):
     # If so, force the kernel size to the maximum possible
     if kernel_size**2 > qubits: kernel_size = int(np.sqrt(qubits))
 
-    dev = qml.device("default.qubit", wires=qubits)
-    # Random circuit parameters
-    rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
+    # Notice how the device construction now happens within the jitted method.
+    # Also note the added '.jax' to the device path.
 
-    @qml.qnode(dev)
-    def circuit(phi, seed=seed):
+    #print(n_layers, qubits)
+
+    dev = qml.device("default.qubit.jax", wires=qubits, shots=1, prng_key=jax.random.PRNGKey(758493))
+    # Random circuit parameters
+    rand_params = jax.random.uniform(jax.random.PRNGKey(758493), shape=(n_layers, qubits))#, maxval=2*jnp.pi)
+
+    # Now we can create our qnode within the circuit function.
+    @qml.qnode(dev, interface="jax")
+    def circuit():
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
-            qml.RY(np.pi * phi[j], wires=j)
+            qml.RY(jnp.pi * phi[j], wires=j)
         # Random quantum circuit
         RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
-    return circuit
+    return circuit()
 
-def rx_random(qubits, kernel_size, filters, n_layers, seed=1):
+@partial(jax.jit, static_argnames=['qubits', 'kernel_size', 'filters', 'n_layers', 'seed'])
+def rx_random(phi, qubits, kernel_size, filters, n_layers, seed):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -63,23 +78,30 @@ def rx_random(qubits, kernel_size, filters, n_layers, seed=1):
     # If so, force the kernel size to the maximum possible
     if kernel_size**2 > qubits: kernel_size = int(np.sqrt(qubits))
 
-    dev = qml.device("default.qubit", wires=qubits)
-    # Random circuit parameters
-    rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
+    # Notice how the device construction now happens within the jitted method.
+    # Also note the added '.jax' to the device path.
 
-    @qml.qnode(dev)
-    def circuit(phi, seed=seed):
+    #print(n_layers, qubits)
+
+    dev = qml.device("default.qubit.jax", wires=qubits, shots=1, prng_key=jax.random.PRNGKey(758493))
+    # Random circuit parameters
+    rand_params = jax.random.uniform(jax.random.PRNGKey(758493), shape=(n_layers, qubits))#, maxval=2*jnp.pi)
+
+    # Now we can create our qnode within the circuit function.
+    @qml.qnode(dev, interface="jax")
+    def circuit():
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
-            qml.RX(np.pi * phi[j], wires=j)
+            qml.RX(jnp.pi * phi[j], wires=j)
         # Random quantum circuit
         RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
-    return circuit
+    return circuit()
 
-def rz_random(qubits, kernel_size, filters, n_layers, seed=1):
+@partial(jax.jit, static_argnames=['qubits', 'kernel_size', 'filters', 'n_layers', 'seed'])
+def rz_random(phi, qubits, kernel_size, filters, n_layers, seed):
     '''
         Creates a Quantum Circuit with a first layer of Ry gates and a sequence of Random Circuits
 
@@ -101,18 +123,24 @@ def rz_random(qubits, kernel_size, filters, n_layers, seed=1):
     # If so, force the kernel size to the maximum possible
     if kernel_size**2 > qubits: kernel_size = int(np.sqrt(qubits))
 
-    dev = qml.device("default.qubit", wires=qubits)
-    # Random circuit parameters
-    rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, qubits))
+    # Notice how the device construction now happens within the jitted method.
+    # Also note the added '.jax' to the device path.
 
-    @qml.qnode(dev)
-    def circuit(phi, seed=seed):
+    #print(n_layers, qubits)
+
+    dev = qml.device("default.qubit.jax", wires=qubits, shots=1, prng_key=jax.random.PRNGKey(758493))
+    # Random circuit parameters
+    rand_params = jax.random.uniform(jax.random.PRNGKey(758493), shape=(n_layers, qubits))#, maxval=2*jnp.pi)
+
+    # Now we can create our qnode within the circuit function.
+    @qml.qnode(dev, interface="jax")
+    def circuit():
         # Encoding of kernel_size x kernel_size classical input values
         for j in range(kernel_size**2):
-            qml.RZ(np.pi * phi[j], wires=j)
+            qml.RZ(jnp.pi * phi[j], wires=j)
         # Random quantum circuit
         RandomLayers(rand_params, wires=list(range(qubits)), seed=seed)
         # Measurement producing #filters classical output values
         return [qml.expval(qml.PauliZ(j)) for j in range(filters)]
 
-    return circuit
+    return circuit()

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
-import random
 import numpy as np
+import random
 import glob
 import os
 
@@ -83,7 +83,7 @@ class datahandler:
         print('{:=^100}\n'.format(''))
         print('Dataset {}\n'.format(name))
         for i, c in enumerate(paths.keys()): print('Class {} - {:<25s} - #images: {}'.format(i,c,len(paths[c])))
-
+        
     def split(self, paths, factor=0.2):
         '''
             Split the dataset given a split facotor
@@ -111,10 +111,13 @@ class datahandler:
             l = len(paths[c])
             val_size   = int(l*factor)
             train_size = int(l - val_size)
+            
+            pts = paths[c]
+            random.shuffle(pts)
 
             # Apply split and fill relative dictionary
-            split_A[c] = paths[c][:train_size]
-            split_B[c] = paths[c][train_size:]
+            split_A[c] = pts[:train_size]
+            split_B[c] = pts[train_size:]
 
         return split_A, split_B
 
