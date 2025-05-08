@@ -27,7 +27,21 @@ Similary there are python file that coresponds to the notebooks:
 1. [Quantum Convolutional Processing](qconv-1cXdataset.py): this python script shows how to load a dataset, how to apply quantum convolution to precces it and how to save results
 2. [Multi Quantum Convolutional Processing](qconv-1cXclass.py): this python script shows how to load a dataset, how to apply quantum convolution with more quantum kernels to precces it and how to save results
 
+### Citation
 
+```
+@ARTICLE{sebastianelli2025quanv4eo,
+  author={Sebastianelli, Alessandro and Mauro, Francesco and Ciabatti, Giulia and Spiller, Dario and Le Saux, Bertrand and Gamba, Paolo and Liberata Ullo, Silvia},
+  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
+  title={Quanv4EO: Empowering Earth Observation by Means of Quanvolutional Neural Networks}, 
+  year={2025},
+  volume={63},
+  number={},
+  pages={1-15},
+  keywords={Feature extraction;Quantum computing;Quantum circuit;Filters;Qubit;Integrated circuit modeling;Remote sensing;Data mining;Climate change;Deep learning;Convolutional neural networks;Earth Observing System;Earth observation (EO);quantum computing (QC);quantum convolutional neural networks (CNNs);quantum deep learning (DL);remote sensing (RS)},
+  doi={10.1109/TGRS.2025.3556335}
+}
+```
 
 ### References
 
